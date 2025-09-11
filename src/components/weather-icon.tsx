@@ -12,22 +12,14 @@ interface WeatherIconProps {
 const WeatherIcon: FC<WeatherIconProps> = ({ iconCode, shortForecast, className }) => {
   if (!iconCode) return null;
 
-  const getFullImageUrl = (iconUrl: string) => {
-    const url = new URL(iconUrl);
-    // You can add logic here to change parameters, e.g., size
-    // url.searchParams.set('size', 'large');
-    return url.toString();
-  };
-
-
   return (
     <div className={className}>
       <Image 
-        src={getFullImageUrl(iconCode)} 
+        src={iconCode} 
         alt={shortForecast || "Weather icon"}
         width={128}
         height={128}
-        unoptimized // Since it's an external URL that can change
+        unoptimized // The API provides full URLs
       />
     </div>
   );

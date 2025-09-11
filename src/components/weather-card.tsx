@@ -25,16 +25,18 @@ const WeatherCard = ({
     onDaySelect, 
     selectedDayIndex 
 }: WeatherCardProps) => {
-  const { name, state } = location;
+  const { name, state, country } = location;
 
   const displayDate = new Date(displayWeather.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  const locationName = [name, state, country].filter(Boolean).join(', ');
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                 <CardTitle className="text-3xl font-bold">{name}{state ? `, ${state}`: ''}</CardTitle>
+                 <CardTitle className="text-3xl font-bold">{locationName}</CardTitle>
                  <CardDescription>{displayDate}</CardDescription>
             </div>
              <div className="text-right">
@@ -52,6 +54,7 @@ const WeatherCard = ({
            <div className="flex items-center">
             <WeatherIcon
               iconCode={displayWeather.icon}
+              shortForecast={displayWeather.shortForecast}
               className="h-32 w-32"
             />
             <div>

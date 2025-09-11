@@ -36,8 +36,7 @@ const getHourlyForSelectedDay = (
   selectedDay: DailyForecast | undefined
 ): HourlyForecast[] => {
   if (!hourly || !selectedDay) return [];
-  const selectedDate = new Date(selectedDay.date).toISOString().split('T')[0];
-  return hourly.filter(h => h.date === selectedDate);
+  return hourly.filter(h => h.date === selectedDay.date);
 };
 
 
@@ -69,9 +68,6 @@ export default function Home() {
       const error = err as Error;
       setWeatherData(null);
       let errorMessage = error.message || 'An unknown error occurred.';
-      if (error.message.includes('404')) {
-        errorMessage = `Could not find weather data for "${city}". The API might not cover this area.`;
-      }
       setError(errorMessage);
       toast({
         variant: 'destructive',
@@ -122,7 +118,7 @@ export default function Home() {
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Enter a city name (US only)..."
+                        placeholder="Enter a city name..."
                         className="pl-10 text-base"
                         {...field}
                         aria-label="City Name"

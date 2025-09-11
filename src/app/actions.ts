@@ -1,119 +1,93 @@
 'use server';
 
-import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, WeatherGovPeriodsResponse, WeatherGovGridResponse, WeatherGovPointResponse } from '@/lib/types';
+import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, WeatherAPIResponse } from '@/lib/types';
 
-// Helper to get city and state from displayName
-function getLocationFromName(displayName: string): { name: string; state: string } {
-    const parts = displayName.split(', ');
-    if (parts.length >= 2) {
-        return { name: parts[0], state: parts[1] };
-    }
-    return { name: displayName, state: '' };
-}
-
-async function getCoordinates(city: string): Promise<{ lat: number; lon: number, name: string, state: string }> {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&countrycodes=us`;
-    const response = await fetch(url, { headers: { 'User-Agent': 'Skycast Weather App' } });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch location data from Nominatim.');
-    }
-
-    const data = await response.json();
-    if (data.length === 0) {
-        throw new Error(`City "${city}" not found.`);
-    }
-
-    const { lat, lon, display_name } = data[0];
-    const { name, state } = getLocationFromName(display_name);
-
-    return { lat: parseFloat(lat), lon: parseFloat(lon), name, state };
-}
-
-async function getGridEndpoints(lat: number, lon: number): Promise<WeatherGovGridResponse> {
-    const url = `https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`;
-    const response = await fetch(url, { headers: { 'User-Agent': 'Skycast Weather App' } });
-
-    if (!response.ok) {
-        if (response.status === 404) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Could not find a weather station for the provided coordinates.');
-        }
-        throw new Error('Failed to fetch grid endpoints from weather.gov API.');
-    }
-
-    const data: WeatherGovPointResponse = await response.json();
-    return data.properties;
-}
+const API_KEY = process.env.WEATHERAPI_API_KEY;
 
 export async function getWeather(city: string): Promise<WeatherData> {
-    const { lat, lon, name, state } = await getCoordinates(city);
-    const gridEndpoints = await getGridEndpoints(lat, lon);
-    const forecastUrl = gridEndpoints.forecast;
-    const forecastHourlyUrl = gridEndpoints.forecastHourly;
-
-    const [forecastResponse, hourlyResponse] = await Promise.all([
-        fetch(forecastUrl, { headers: { 'User-Agent': 'Skycast Weather App' } }),
-        fetch(forecastHourlyUrl, { headers: { 'User-Agent': 'Skycast Weather App' } })
-    ]);
-
-    if (!forecastResponse.ok) {
-        throw new Error('Failed to fetch daily forecast data from weather.gov.');
+    if (!API_KEY) {
+        throw new Error("WeatherAPI.com API key is missing. Please add WEATHERAPI_API_KEY to your .env file.");
     }
-    if (!hourlyResponse.ok) {
-        throw new Error('Failed to fetch hourly forecast data from weather.gov.');
-    }
-
-    const forecastData: WeatherGovPeriodsResponse = await forecastResponse.json();
-    const hourlyData: WeatherGovPeriodsResponse = await hourlyResponse.json();
-
-    const { periods } = forecastData.properties;
-    const { periods: hourlyPeriods } = hourlyData.properties;
     
-    if (!periods || periods.length === 0) {
-        throw new Error("No forecast data available.");
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=7&aqi=no&alerts=no`;
+    
+    const response = await fetch(url, { headers: { 'User-Agent': 'Skycast Weather App' } });
+
+    if (!response.ok) {
+        if (response.status === 400) {
+            const errorData = await response.json();
+            throw new Error(errorData?.error?.message || `City "${city}" not found.`);
+        }
+        throw new Error('Failed to fetch weather data from WeatherAPI.com.');
     }
 
-    const currentConditions = periods[0];
-    const dailyForecasts: DailyForecast[] = [];
-    const processedDays = new Set<string>();
+    const data: WeatherAPIResponse = await response.json();
 
-    for (const period of periods) {
-        const date = new Date(period.startTime).toLocaleDateString('en-US', { timeZone: gridEndpoints.timeZone });
-        if (processedDays.has(date)) continue;
+    const currentConditions: WeatherPeriod = {
+        number: 1,
+        name: new Date(data.location.localtime).getHours() < 18 ? 'Today' : 'Tonight',
+        startTime: new Date(data.current.last_updated_epoch * 1000).toISOString(),
+        endTime: new Date(data.current.last_updated_epoch * 1000).toISOString(),
+        isDaytime: !!data.current.is_day,
+        temperature: data.current.temp_f,
+        temperatureUnit: 'F',
+        temperatureTrend: null,
+        probabilityOfPrecipitation: { value: data.forecast.forecastday[0].day.daily_chance_of_rain },
+        relativeHumidity: { value: data.current.humidity },
+        windSpeed: `${data.current.wind_mph} mph`,
+        windDirection: data.current.wind_dir,
+        icon: `https:${data.current.condition.icon}`,
+        shortForecast: data.current.condition.text,
+        detailedForecast: data.current.condition.text,
+    };
 
-        const dayPeriods = periods.filter(p => new Date(p.startTime).toLocaleDateString('en-US', { timeZone: gridEndpoints.timeZone }) === date);
-        const dayPeriod = dayPeriods.find(p => p.isDaytime) || dayPeriods[0];
-        const nightPeriod = dayPeriods.find(p => !p.isDaytime);
-
-        dailyForecasts.push({
-            date: new Date(dayPeriod.startTime).toISOString(),
-            day: new Date(dayPeriod.startTime).toLocaleDateString('en-US', { weekday: 'short', timeZone: gridEndpoints.timeZone }),
-            high: dayPeriod.temperature,
-            low: nightPeriod?.temperature ?? dayPeriod.temperature,
-            icon: dayPeriod.icon,
-            shortForecast: dayPeriod.shortForecast,
-            periods: dayPeriods,
-        });
-        processedDays.add(date);
-    }
-
-    const hourlyForecasts: HourlyForecast[] = hourlyPeriods.map(period => ({
-        time: new Date(period.startTime).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: gridEndpoints.timeZone }),
-        temperature: period.temperature,
-        icon: period.icon,
-        date: new Date(period.startTime).toISOString().split('T')[0],
+    const dailyForecasts: DailyForecast[] = data.forecast.forecastday.map(fd => ({
+        date: fd.date,
+        day: new Date(fd.date_epoch * 1000).toLocaleDateString('en-US', { weekday: 'short', timeZone: data.location.tz_id }),
+        high: fd.day.maxtemp_f,
+        low: fd.day.mintemp_f,
+        icon: `https:${fd.day.condition.icon}`,
+        shortForecast: fd.day.condition.text,
+        periods: [
+             {
+                number: 1,
+                name: 'Day',
+                startTime: new Date(fd.date_epoch * 1000).toISOString(),
+                endTime: new Date(fd.date_epoch * 1000).toISOString(),
+                isDaytime: true,
+                temperature: fd.day.maxtemp_f,
+                temperatureUnit: 'F',
+                temperatureTrend: null,
+                probabilityOfPrecipitation: { value: fd.day.daily_chance_of_rain },
+                relativeHumidity: { value: fd.day.avghumidity },
+                windSpeed: `${fd.day.maxwind_mph} mph`,
+                windDirection: '', 
+                icon: `https:${fd.day.condition.icon}`,
+                shortForecast: fd.day.condition.text,
+                detailedForecast: fd.day.condition.text,
+            }
+        ],
     }));
+
+    const hourlyForecasts: HourlyForecast[] = data.forecast.forecastday.flatMap(fd => 
+        fd.hour.map(hour => ({
+            time: new Date(hour.time_epoch * 1000).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: data.location.tz_id }),
+            temperature: hour.temp_f,
+            icon: `https:${hour.condition.icon}`,
+            date: fd.date,
+        }))
+    );
 
     return {
         location: {
-            name: name,
-            state: state,
-            lat,
-            lon,
+            name: data.location.name,
+            state: data.location.region,
+            country: data.location.country,
+            lat: data.location.lat,
+            lon: data.location.lon,
         },
         current: currentConditions,
-        daily: dailyForecasts.slice(0, 7),
+        daily: dailyForecasts,
         hourly: hourlyForecasts,
     };
 }

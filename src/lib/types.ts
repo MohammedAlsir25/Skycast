@@ -1,127 +1,107 @@
-// Generic types for the application data structure
+// Types for WeatherAPI.com
 export interface WeatherLocation {
-  name: string;
-  state: string;
-  lat: number;
-  lon: number;
+    name: string;
+    state: string;
+    country: string;
+    lat: number;
+    lon: number;
 }
 
 export interface WeatherPeriod {
-  number: number;
-  name: string;
-  startTime: string;
-  endTime: string;
-  isDaytime: boolean;
-  temperature: number;
-  temperatureUnit: string;
-  temperatureTrend: string | null;
-  probabilityOfPrecipitation: {
-    unitCode: string;
-    value: number | null;
-  };
-  dewpoint: {
-    unitCode: string;
-    value: number | null;
-  };
-  relativeHumidity: {
-    unitCode: string;
-    value: number | null;
-  };
-  windSpeed: string;
-  windDirection: string;
-  icon: string;
-  shortForecast: string;
-  detailedForecast: string;
+    number: number;
+    name: string;
+    startTime: string;
+    endTime: string;
+    isDaytime: boolean;
+    temperature: number;
+    temperatureUnit: string;
+    temperatureTrend: string | null;
+    probabilityOfPrecipitation: {
+        value: number | null;
+    };
+    relativeHumidity: {
+        value: number | null;
+    };
+    windSpeed: string;
+    windDirection: string;
+    icon: string;
+    shortForecast: string;
+    detailedForecast: string;
 }
 
 export interface DailyForecast {
-  date: string;
-  day: string;
-  high: number;
-  low: number;
-  icon: string;
-  shortForecast: string;
-  periods: WeatherPeriod[];
+    date: string; // YYYY-MM-DD
+    day: string; // "Sun", "Mon", etc.
+    high: number;
+    low: number;
+    icon: string;
+    shortForecast: string;
+    periods: WeatherPeriod[];
 }
 
 export interface HourlyForecast {
-    time: string;
+    time: string; // "1 AM", "2 AM", etc.
     temperature: number;
     icon: string;
-    date: string; // YYYY-MM-DD to filter by day
+    date: string; // YYYY-MM-DD
 }
-
 
 export interface WeatherData {
-  location: WeatherLocation;
-  current: WeatherPeriod;
-  daily: DailyForecast[];
-  hourly: HourlyForecast[];
+    location: WeatherLocation;
+    current: WeatherPeriod;
+    daily: DailyForecast[];
+    hourly: HourlyForecast[];
 }
 
 
-// Types for weather.gov API responses
-export interface WeatherGovPointResponse {
-    "@context": [string, { "@version": string, "wx": string, "s": string, "geo": string, "unit": string, "vocab": string }];
-    id: string;
-    type: string;
-    geometry: {
-        type: string;
-        coordinates: [number, number];
+// API Response Types
+export interface WeatherAPIResponse {
+    location: {
+        name: string;
+        region: string;
+        country: string;
+        lat: number;
+        lon: number;
+        tz_id: string;
+        localtime_epoch: number;
+        localtime: string;
     };
-    properties: WeatherGovGridResponse;
-}
-
-export interface WeatherGovGridResponse {
-    "@id": string;
-    "@type": string;
-    cwa: string;
-    forecastOffice: string;
-    gridId: string;
-    gridX: number;
-    gridY: number;
-    forecast: string;
-    forecastHourly: string;
-    forecastGridData: string;
-    observationStations: string;
-    relativeLocation: {
-        type: string;
-        geometry: {
-            type: string;
-            coordinates: [number, number];
+    current: {
+        last_updated_epoch: number;
+        temp_f: number;
+        is_day: number;
+        condition: {
+            text: string;
+            icon: string;
         };
-        properties: {
-            city: string;
-            state: string;
-            distance: {
-                unitCode: string;
-                value: number;
-            };
-            bearing: {
-                unitCode: string;
-                value: number;
-            };
-        };
+        wind_mph: number;
+        wind_dir: string;
+        humidity: number;
     };
-    forecastZone: string;
-    county: string;
-    fireWeatherZone: string;
-    timeZone: string;
-    radarStation: string;
-}
-
-export interface WeatherGovPeriodsResponse {
-    properties: {
-        updated: string;
-        units: string;
-        forecastGenerator: string;
-        generatedAt: string;
-        updateTime: string;
-        validTimes: string;
-        elevation: {
-            unitCode: string;
-            value: number;
-        };
-        periods: WeatherPeriod[];
+    forecast: {
+        forecastday: {
+            date: string;
+            date_epoch: number;
+            day: {
+                maxtemp_f: number;
+                mintemp_f: number;
+                maxwind_mph: number;
+                avghumidity: number;
+                daily_chance_of_rain: number;
+                condition: {
+                    text: string;
+                    icon: string;
+                };
+            };
+            hour: {
+                time_epoch: number;
+                time: string;
+                temp_f: number;
+                condition: {
+                    text: string;
+                    icon: string;
+                };
+            }[];
+        }[];
     };
 }
