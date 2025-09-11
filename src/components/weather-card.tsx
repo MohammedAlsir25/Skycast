@@ -73,18 +73,18 @@ const WeatherCard = ({ data }: WeatherCardProps) => {
               <p className="text-xs text-muted-foreground">Wind Speed</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-accent/50 p-3">
-            <Gauge className="h-5 w-5 text-primary" />
-            <div>
-              <p className="font-semibold">{main.pressure} hPa</p>
-              <p className="text-xs text-muted-foreground">Pressure</p>
-            </div>
-          </div>
            <div className="flex items-center gap-2 rounded-lg bg-accent/50 p-3">
             <Sunrise className="h-5 w-5 text-primary" />
             <div>
               <p className="font-semibold">{formatTime(sys.sunrise)}</p>
               <p className="text-xs text-muted-foreground">Sunrise</p>
+            </div>
+          </div>
+           <div className="flex items-center gap-2 rounded-lg bg-accent/50 p-3">
+            <Sunset className="h-5 w-5 text-primary" />
+            <div>
+              <p className="font-semibold">{formatTime(sys.sunset)}</p>
+              <p className="text-xs text-muted-foreground">Sunset</p>
             </div>
           </div>
         </div>
