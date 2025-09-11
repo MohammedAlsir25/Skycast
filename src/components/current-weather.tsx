@@ -38,6 +38,8 @@ const CurrentWeather = ({
     const locationName = locationParts.filter(Boolean).join(', ');
 
     const displayTemp = tempUnit === 'F' ? displayWeather.temperature_f : displayWeather.temperature_c;
+    const highTemp = tempUnit === 'F' ? selectedDay?.high_f : selectedDay?.high_c;
+    const lowTemp = tempUnit === 'F' ? selectedDay?.low_f : selectedDay?.low_c;
 
     return (
         <Card className="w-full bg-card/80 backdrop-blur-sm">
@@ -81,9 +83,16 @@ const CurrentWeather = ({
                     <p className="font-headline text-8xl font-bold">
                         {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
                     </p>
-                    <p className="text-lg font-semibold capitalize -mt-4">
-                        {displayWeather.shortForecast}
-                    </p>
+                    <div className='-mt-4 space-y-1'>
+                        <p className="text-lg font-semibold capitalize">
+                            {displayWeather.shortForecast}
+                        </p>
+                        {highTemp !== undefined && lowTemp !== undefined && (
+                            <p className="text-sm font-medium text-muted-foreground">
+                                H: {Math.round(highTemp)}&deg; &nbsp; L: {Math.round(lowTemp)}&deg;
+                            </p>
+                        )}
+                    </div>
                     <Separator className="my-4 w-1/2" />
                     <WeatherDetails period={displayWeather} sunrise={selectedDay?.sunrise} sunset={selectedDay?.sunset} />
                 </div>
