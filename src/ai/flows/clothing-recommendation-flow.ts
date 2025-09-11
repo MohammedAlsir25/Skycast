@@ -41,13 +41,18 @@ const clothingRecommendationFlow = ai.defineFlow(
         Keep it to a single sentence.
       `;
 
-    const { output } = await ai.generate({
-      prompt: prompt,
-      output: {
-        schema: ClothingRecommendationSchema
-      },
-    });
+    try {
+      const { output } = await ai.generate({
+        prompt: prompt,
+        output: {
+          schema: ClothingRecommendationSchema
+        },
+      });
 
-    return output!;
+      return output!;
+    } catch (error) {
+      console.error("AI clothing recommendation failed:", error);
+      return { recommendation: "" };
+    }
   }
 );
