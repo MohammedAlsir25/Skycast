@@ -61,23 +61,18 @@ function generateMockWeatherData(city: string): WeatherData {
 export async function getWeather(city: string): Promise<WeatherData> {
   const apiKey = process.env.OPENWEATHERMAP_API_KEY;
 
-  if (apiKey) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        if (response.status === 404) {
-            throw new Error('City not found');
-        }
-        throw new Error('Failed to fetch weather data');
-    }
-    const data = await response.json();
-    return data;
+  if (!apiKey) {
+    throw new Error('Missing OpenWeatherMap API Key. Please add it to your .env file to fetch real weather data. You can get a free key from https://openweathermap.org/price.');
   }
 
-  // --- Mock implementation if API key is not available ---
-  console.log('Using mock weather data. Set OPENWEATHERMAP_API_KEY for real data.');
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-  
-  // Generate mock data for any city
-  return generateMockWeatherData(city);
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+  const response = await fetch(url);
+  if (!response.ok) {
+      if (response.status === 404) {
+          throw new Error('City not found');
+      }
+      throw new Error('Failed to fetch weather data');
+  }
+  const data = await response.json();
+  return data;
 }

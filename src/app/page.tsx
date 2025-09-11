@@ -21,6 +21,8 @@ import WeatherCard from '@/components/weather-card';
 import { getWeather } from '@/app/actions';
 import type { WeatherData } from '@/lib/types';
 import { suggestLocation } from '@/ai/flows/ai-suggest-location';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Terminal } from 'lucide-react';
 
 const formSchema = z.object({
   city: z
@@ -34,6 +36,7 @@ export default function Home() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
@@ -47,6 +50,7 @@ export default function Home() {
     setLoading(true);
     setWeather(null);
     setSuggestions([]);
+    setError(null);
     form.setValue('city', city);
     form.clearErrors();
 
@@ -55,11 +59,16 @@ export default function Home() {
       setWeather(weatherData);
     } catch (error) {
       const err = error as Error;
-      toast({
-        variant: 'destructive',
-        title: 'An error occurred',
-        description: err.message || 'Failed to fetch weather data.',
-      });
+      if (err.message.startsWith('Missing OpenWeatherMap API Key')) {
+        setError(err.message);
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'An error occurred',
+          description: err.message || 'Failed to fetch weather data.',
+        });
+      }
+      
       if (err.message.toLowerCase().includes('not found')) {
         try {
           const aiResponse = await suggestLocation({ city });
@@ -127,6 +136,24 @@ export default function Home() {
           </form>
         </Form>
         
+        <AnimatePresence>
+          {error && (
+             <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <Alert>
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Action Required</AlertTitle>
+                <AlertDescription>
+                  {error}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence>
           {suggestions.length > 0 && (
             <motion.div
