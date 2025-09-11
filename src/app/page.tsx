@@ -33,8 +33,8 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 export default function Home() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -48,17 +48,17 @@ export default function Home() {
 
   const handleSearch = async (city: string) => {
     setLoading(true);
-    setWeather(null);
     setSuggestions([]);
     setError(null);
     form.setValue('city', city);
     form.clearErrors();
 
     try {
-      const weatherData = await getWeather(city);
-      setWeather(weatherData);
+      const data = await getWeather(city);
+      setWeatherData(data);
     } catch (err) {
       const error = err as Error;
+      setWeatherData(null);
       if (error.message.startsWith('Missing OpenWeatherMap API Key')) {
         setError(error.message);
       } else {
@@ -79,13 +79,12 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const onSubmit = (data: FormSchema) => {
     handleSearch(data.city);
   };
   
-  // Initial search on component mount
   useEffect(() => {
     handleSearch('New York');
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,13 +93,13 @@ export default function Home() {
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-4xl space-y-6">
-        <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
-           <div className="text-center md:text-left">
+        <div className="flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
+           <div>
             <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                {weather ? `${weather.name}, ${weather.sys.country}`: "Skycast"}
+                Skycast
             </h1>
             <p className="mt-1 text-muted-foreground">
-                {weather ? new Date(weather.current.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Your weather, simplified."}
+                Your weather, simplified.
             </p>
         </div>
 
@@ -187,14 +186,14 @@ export default function Home() {
         </AnimatePresence>
 
 
-        <div className="relative min-h-[450px]">
-            {(loading || !weather) && (
+        <div className="relative min-h-[550px]">
+            {(loading) && (
                  <div className="absolute inset-0 flex h-full items-center justify-center">
                     <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
                 </div>
             )}
           <AnimatePresence>
-            {weather && (
+            {weatherData && !loading && (
               <motion.div
                 key="weather-card"
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -203,7 +202,7 @@ export default function Home() {
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0"
               >
-                <WeatherCard data={weather} />
+                <WeatherCard data={weatherData} />
               </motion.div>
             )}
           </AnimatePresence>

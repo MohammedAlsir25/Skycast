@@ -127,8 +127,8 @@ export interface DailyWeatherData {
 export interface WeatherData {
   current: CurrentWeatherData;
   daily: DailyWeatherData[];
-  name?: string;
-  sys?: {
-    country?: string;
+  name: string;
+  sys: {
+    country: string;
   }
 }
