@@ -7,6 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 interface WeatherAlertsProps {
   alerts: WeatherAlert[] | undefined;
@@ -18,52 +20,59 @@ const WeatherAlerts = ({ alerts }: WeatherAlertsProps) => {
   }
 
   return (
-    <div className='space-y-2'>
+    <div>
         <Accordion type="single" collapsible className="w-full">
-            {alerts.map((alert, index) => (
-                <AccordionItem key={index} value={`item-${index}`} className="border-none">
-                     <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive-foreground rounded-lg mb-2">
-                        <AccordionTrigger className="w-full p-0 hover:no-underline">
-                             <div className="flex items-center justify-between w-full p-4">
-                                <div className="flex items-start text-left">
-                                    <AlertTriangle className="h-5 w-5 !text-destructive mr-4 flex-shrink-0" />
-                                    <div>
-                                        <AlertTitle className="font-bold">{alert.event}</AlertTitle>
-                                        <AlertDescription className="text-destructive-foreground/80">
-                                            {alert.headline}
-                                        </AlertDescription>
-                                    </div>
-                                </div>
+            <AccordionItem value="item-1" className="border-none">
+                <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive-foreground rounded-lg">
+                    <AccordionTrigger className="w-full p-4 hover:no-underline">
+                        <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center text-left">
+                                <AlertTriangle className="h-5 w-5 !text-destructive mr-4 flex-shrink-0" />
+                                <AlertTitle className="font-bold">
+                                    Active Weather Alerts
+                                </AlertTitle>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Badge variant="destructive">{alerts.length}</Badge>
                                 <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                             </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="px-4 pb-4">
-                                <div className="space-y-4 pt-4 text-sm border-t border-destructive/30">
-                                    <div>
-                                        <h4 className="font-semibold mb-1">Description</h4>
-                                        <p className="text-muted-foreground">{alert.desc}</p>
-                                    </div>
-                                    {alert.instruction && (
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                        <div className="px-4 pb-4 space-y-4">
+                            {alerts.map((alert, index) => (
+                                <div key={index}>
+                                    {index > 0 && <Separator className="my-4 bg-destructive/30" />}
+                                    <div className="space-y-3 pt-2 text-sm">
                                         <div>
-                                            <h4 className="font-semibold mb-1">Instruction</h4>
-                                            <p className="text-muted-foreground">{alert.instruction}</p>
+                                            <h4 className="font-bold text-base mb-1">{alert.event}</h4>
+                                            <p className="text-muted-foreground font-semibold">{alert.headline}</p>
                                         </div>
-                                    )}
-                                    <div className="text-xs text-muted-foreground pt-4">
-                                        <p>
-                                            <strong>Effective:</strong> {new Date(alert.effective).toLocaleString()}
-                                        </p>
-                                        <p>
-                                            <strong>Expires:</strong> {new Date(alert.expires).toLocaleString()}
-                                        </p>
+                                        <div>
+                                            <h5 className="font-semibold mb-1">Description</h5>
+                                            <p className="text-muted-foreground">{alert.desc}</p>
+                                        </div>
+                                        {alert.instruction && (
+                                            <div>
+                                                <h5 className="font-semibold mb-1">Instruction</h5>
+                                                <p className="text-muted-foreground">{alert.instruction}</p>
+                                            </div>
+                                        )}
+                                        <div className="text-xs text-muted-foreground pt-2">
+                                            <p>
+                                                <strong>Effective:</strong> {new Date(alert.effective).toLocaleString()}
+                                            </p>
+                                            <p>
+                                                <strong>Expires:</strong> {new Date(alert.expires).toLocaleString()}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </AccordionContent>
-                    </Alert>
-                </AccordionItem>
-            ))}
+                            ))}
+                        </div>
+                    </AccordionContent>
+                </Alert>
+            </AccordionItem>
         </Accordion>
     </div>
   );
