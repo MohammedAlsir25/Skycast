@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { WeatherPeriod } from '@/lib/types';
+import type { WeatherData } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface WeatherBackgroundProps {
-  weather: WeatherPeriod | null | undefined;
+  weatherData: WeatherData | null | undefined;
 }
 
-const getWeatherBackgroundClass = (weather: WeatherPeriod | null | undefined): string => {
+const getWeatherBackgroundClass = (weatherData: WeatherData | null | undefined): string => {
+  const weather = weatherData?.current;
   if (!weather) return 'bg-default';
 
   const { shortForecast, isDaytime } = weather;
@@ -31,28 +32,34 @@ const getWeatherBackgroundClass = (weather: WeatherPeriod | null | undefined): s
   return 'bg-default';
 };
 
-const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
+const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weatherData }) => {
   const [backgroundClass, setBackgroundClass] = useState('bg-default');
   const [previousClass, setPreviousClass] = useState('');
   const [transform, setTransform] = useState('rotate(180deg) translateX(45vw) rotate(-180deg)');
   const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
-    const newClass = getWeatherBackgroundClass(weather);
+    const newClass = getWeatherBackgroundClass(weatherData);
     if (newClass !== backgroundClass) {
       setPreviousClass(backgroundClass);
       setBackgroundClass(newClass);
     }
-  }, [weather, backgroundClass]);
+  }, [weatherData, backgroundClass]);
   
   useEffect(() => {
-    const now = new Date();
+    if (!weatherData) {
+        setOpacity(0);
+        return;
+    };
+    
+    // Use the localtime from the API response
+    const now = new Date(weatherData.location.localtime);
     const hours = now.getHours();
     const minutes = now.getMinutes();
 
     let startHour, endHour;
     
-    if (weather?.isDaytime) {
+    if (weatherData.current.isDaytime) {
       startHour = 6; // 6 AM
       endHour = 18; // 6 PM
       
@@ -73,13 +80,16 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
 
       let currentHour = hours;
       // Handle hours past midnight
-      if (currentHour < startHour) {
-          currentHour += 24;
+      if (currentHour < endHour) { // e.g. it's 2 AM
+          currentHour += 24; // Treat it as 26 for calculation
       }
 
-      if (currentHour >= startHour && currentHour < startHour + 12) {
+      const effectiveStartHour = startHour; // 18
+      const effectiveEndHour = startHour + 12; // 30
+
+      if (currentHour >= effectiveStartHour && currentHour < effectiveEndHour) {
           const totalMinutesInCycle = 12 * 60;
-          const elapsedMinutes = (currentHour - startHour) * 60 + minutes;
+          const elapsedMinutes = (currentHour - effectiveStartHour) * 60 + minutes;
           const percentage = elapsedMinutes / totalMinutesInCycle;
           // Arc from 180deg (left) to 360deg (right) over the top
           const degrees = 180 + (percentage * 180);
@@ -89,7 +99,7 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
           setOpacity(0);
       }
     }
-  }, [weather]);
+  }, [weatherData]);
 
 
   // We render two divs to create a cross-fade effect.
@@ -98,9 +108,9 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
     <>
         <div key={previousClass} className={cn('weather-bg', previousClass, 'opacity-0')} />
         <div key={backgroundClass} className={cn('weather-bg', backgroundClass, 'opacity-100')}>
-            {weather && (
+            {weatherData && (
                 <div 
-                    className={cn('celestial-body', weather.isDaytime ? 'sun' : 'moon')}
+                    className={cn('celestial-body', weatherData.current.isDaytime ? 'sun' : 'moon')}
                     style={{ transform, opacity, transition: 'transform 1s ease-out, opacity 1s ease-out' }}
                 />
             )}

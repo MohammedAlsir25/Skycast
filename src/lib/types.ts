@@ -7,6 +7,7 @@ export const WeatherLocationSchema = z.object({
     country: z.string(),
     lat: z.number(),
     lon: z.number(),
+    localtime: z.string(),
 });
 
 export const WeatherPeriodSchema = z.object({
@@ -114,6 +115,7 @@ export interface WeatherAPIResponse {
                 time: string;
                 temp_f: number;
                 temp_c: number;
+                is_day: number;
                 condition: {
                     text: string;
                     icon: string;

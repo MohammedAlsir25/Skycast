@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin } from 'lucide-react';
+import { Search, LoaderCircle, MapPin, Moon, Sun } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
+import { ThemeProvider } from '@/components/theme-provider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useTheme } from 'next-themes';
 
 const formSchema = z.object({
   city: z
@@ -41,6 +44,33 @@ const getHourlyForSelectedDay = (
   if (!hourly || !selectedDay) return [];
   return hourly.filter(h => h.date === selectedDay.date);
 };
+
+function ThemeToggle() {
+    const { setTheme } = useTheme();
+  
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setTheme('light')}>
+            Light
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme('dark')}>
+            Dark
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme('system')}>
+            System
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
 
 export default function Home() {
@@ -105,56 +135,58 @@ export default function Home() {
 
   return (
     <>
-      <WeatherBackground weather={weatherData?.current} />
+      <WeatherBackground weatherData={weatherData} />
       <main className="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 lg:p-8 relative z-10">
         <div className="w-full max-w-4xl space-y-6">
-          <div className="flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
-            <div>
+          <div className="flex w-full items-center justify-between">
+            <div className='flex items-center gap-2'>
               <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                   Skycast
               </h1>
-              <p className="mt-1 text-muted-foreground">
+              <p className="mt-1 text-muted-foreground hidden md:block">
                   Your weather, simplified.
               </p>
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full max-w-sm">
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="relative">
-                        <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                          placeholder="Enter a city name..."
-                          className="pl-10 text-base bg-card/80 backdrop-blur-sm"
-                          {...field}
-                          aria-label="City Name"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2"
-                disabled={loading}
-                aria-label="Search"
-              >
-                {loading ? (
-                  <LoaderCircle className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Search className="h-5 w-5" />
-                )}
-              </Button>
-            </form>
-          </Form>
+            </div>
+            <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full max-w-xs">
+                    <FormField
+                        control={form.control}
+                        name="city"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                placeholder="Enter a city name..."
+                                className="pl-10 text-base bg-card/80 backdrop-blur-sm"
+                                {...field}
+                                aria-label="City Name"
+                                />
+                            </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <Button
+                        type="submit"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2"
+                        disabled={loading}
+                        aria-label="Search"
+                    >
+                        {loading ? (
+                        <LoaderCircle className="h-5 w-5 animate-spin" />
+                        ) : (
+                        <Search className="h-5 w-5" />
+                        )}
+                    </Button>
+                    </form>
+                </Form>
+            </div>
           </div>
           
           <AnimatePresence>

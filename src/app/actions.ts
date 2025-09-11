@@ -80,6 +80,7 @@ export async function getWeather(city: string): Promise<WeatherData> {
             temperature_c: hour.temp_c,
             icon: `https:${hour.condition.icon}`,
             date: fd.date,
+            is_day: !!hour.is_day,
         }))
     );
 
@@ -90,6 +91,7 @@ export async function getWeather(city: string): Promise<WeatherData> {
             country: data.location.country,
             lat: data.location.lat,
             lon: data.location.lon,
+            localtime: data.location.localtime,
         },
         current: currentConditions,
         daily: dailyForecasts,
