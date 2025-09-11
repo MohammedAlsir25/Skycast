@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { useEffect, useState, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -28,10 +27,7 @@ import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import NearbyCities from '@/components/nearby-cities';
-
-const MapModal = dynamic(() => import('@/components/map-modal'), {
-  ssr: false,
-});
+import MapModal from '@/components/map-modal';
 
 
 const formSchema = z.object({
@@ -172,12 +168,14 @@ export default function Home() {
   return (
     <>
       <WeatherBackground weatherData={weatherData} />
-      <MapModal 
-        isOpen={isMapOpen} 
-        onClose={() => setIsMapOpen(false)} 
-        weatherDataList={allCitiesOnMap}
-        tempUnit={tempUnit}
-      />
+      <Suspense fallback={<div>Loading map...</div>}>
+        <MapModal 
+          isOpen={isMapOpen} 
+          onClose={() => setIsMapOpen(false)} 
+          weatherDataList={allCitiesOnMap}
+          tempUnit={tempUnit}
+        />
+      </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 lg:p-8 relative z-10">
         <div className="w-full max-w-4xl space-y-6">
           <div className="flex w-full items-center justify-between">
