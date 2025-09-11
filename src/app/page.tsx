@@ -97,10 +97,10 @@ export default function Home() {
         <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
            <div className="text-center md:text-left">
             <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                {weather ? `${weather.name}, ${weather.country}`: "Skycast"}
+                {weather ? `${weather.name}, ${weather.sys.country}`: "Skycast"}
             </h1>
             <p className="mt-1 text-muted-foreground">
-                {weather ? new Date(weather.current.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Your weather, simplified."}
+                {weather ? new Date(weather.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Your weather, simplified."}
             </p>
         </div>
 
@@ -187,7 +187,7 @@ export default function Home() {
         </AnimatePresence>
 
 
-        <div className="relative min-h-[480px]">
+        <div className="relative min-h-[300px]">
             {loading && !weather && (
                  <div className="absolute inset-0 flex h-full items-center justify-center">
                     <LoaderCircle className="h-12 w-12 animate-spin text-primary" />

@@ -4,11 +4,11 @@ import type { WeatherData } from '@/lib/types';
 import WeatherDetails from './weather-details';
 
 interface CurrentWeatherProps {
-  data: WeatherData['current'];
+  data: WeatherData;
 }
 
 const CurrentWeather = ({ data }: CurrentWeatherProps) => {
-  const { temp, feels_like, weather } = data;
+  const { main, weather, sys } = data;
   const weatherInfo = weather[0];
 
   return (
@@ -22,7 +22,7 @@ const CurrentWeather = ({ data }: CurrentWeatherProps) => {
             />
             <div>
               <p className="font-headline text-8xl font-bold">
-                {Math.round(temp)}&deg;
+                {Math.round(main.temp)}&deg;
               </p>
               <p className="text-lg capitalize text-muted-foreground">
                 {weatherInfo.description}
@@ -31,7 +31,7 @@ const CurrentWeather = ({ data }: CurrentWeatherProps) => {
           </div>
           <div className="text-center md:text-right">
             <p className="text-2xl font-semibold">
-              Feels like {Math.round(feels_like)}&deg;
+              Feels like {Math.round(main.feels_like)}&deg;
             </p>
             <p className="text-sm text-muted-foreground">
               The real feel temperature
