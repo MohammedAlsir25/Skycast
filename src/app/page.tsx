@@ -27,7 +27,7 @@ import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import NearbyCities from '@/components/nearby-cities';
-import MapModal from '@/components/map-modal';
+import { getMapUrl } from '@/components/map-modal';
 
 
 const formSchema = z.object({
@@ -56,7 +56,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [tempUnit, setTempUnit] = useState<TempUnit>('F');
-  const [isMapOpen, setIsMapOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
@@ -168,14 +167,6 @@ export default function Home() {
   return (
     <>
       <WeatherBackground weatherData={weatherData} />
-      <Suspense fallback={<div>Loading map...</div>}>
-        <MapModal 
-          isOpen={isMapOpen} 
-          onClose={() => setIsMapOpen(false)} 
-          weatherDataList={allCitiesOnMap}
-          tempUnit={tempUnit}
-        />
-      </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 lg:p-8 relative z-10">
         <div className="w-full max-w-4xl space-y-6">
           <div className="flex w-full items-center justify-between">
@@ -291,7 +282,10 @@ export default function Home() {
                         loading={loadingNearby}
                         tempUnit={tempUnit}
                         onCityClick={handleSearch}
-                        onViewMapClick={() => setIsMapOpen(true)}
+                        onViewMapClick={() => {
+                            const mapUrl = getMapUrl(allCitiesOnMap, tempUnit);
+                            window.open(mapUrl, '_blank');
+                        }}
                       />
                     }
                   />
