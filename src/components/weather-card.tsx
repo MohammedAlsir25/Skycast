@@ -27,16 +27,18 @@ const WeatherCard = ({
 }: WeatherCardProps) => {
   const { name, state } = location;
 
+  const displayDate = new Date(displayWeather.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
                  <CardTitle className="text-3xl font-bold">{name}{state ? `, ${state}`: ''}</CardTitle>
-                 <CardDescription>{new Date(displayWeather.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</CardDescription>
+                 <CardDescription>{displayDate}</CardDescription>
             </div>
              <div className="text-right">
-                <p className="text-lg font-semibold">
+                <p className="text-lg font-semibold capitalize">
                   {displayWeather.shortForecast}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -50,7 +52,7 @@ const WeatherCard = ({
            <div className="flex items-center">
             <WeatherIcon
               iconCode={displayWeather.icon}
-              className="h-32 w-32 text-primary"
+              className="h-32 w-32"
             />
             <div>
               <p className="font-headline text-8xl font-bold">

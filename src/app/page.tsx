@@ -31,21 +31,13 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-// Helper to filter hourly data for the selected day
 const getHourlyForSelectedDay = (
   hourly: HourlyForecast[] | undefined,
   selectedDay: DailyForecast | undefined
 ): HourlyForecast[] => {
   if (!hourly || !selectedDay) return [];
-  // This is a simplified filter. A more robust solution would handle timezone differences.
-  // weather.gov hourly forecast starts from the current hour.
-  // We'll show the next 24 hours from the time of the query if the first day is selected.
-  // For subsequent days, this filtering logic would need to be more complex.
-  // For now, we only show the hourly forecast for the *current* day.
-  if (new Date(selectedDay.date).toDateString() === new Date().toDateString()) {
-     return hourly.slice(0, 12); // Show next 12 hours for today
-  }
-  return []; // Don't show hourly for future days as the data isn't aligned
+  const selectedDate = new Date(selectedDay.date).toISOString().split('T')[0];
+  return hourly.filter(h => h.date === selectedDate).slice(0, 12);
 };
 
 
@@ -99,7 +91,7 @@ export default function Home() {
   const selectedDay = weatherData?.daily[selectedDayIndex];
 
   // The main display card will show the first period of the selected day.
-  const displayWeather: WeatherPeriod | null = selectedDay?.periods[0] || (selectedDayIndex === 0 ? weatherData?.current : null) || null;
+  const displayWeather: WeatherPeriod | null = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
   const displayTemp = selectedDayIndex === 0 ? weatherData?.current.temperature : selectedDay?.high;
 
 
@@ -112,7 +104,7 @@ export default function Home() {
                 Skycast
             </h1>
             <p className="mt-1 text-muted-foreground">
-                Your weather, simplified. (US Only)
+                Your weather, simplified.
             </p>
         </div>
 
@@ -127,7 +119,7 @@ export default function Home() {
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Enter a US city name..."
+                        placeholder="Enter a city name..."
                         className="pl-10 text-base"
                         {...field}
                         aria-label="City Name"

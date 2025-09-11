@@ -26,7 +26,7 @@ const DailyForecast = ({ data, title = "7-Day Forecast", onDaySelect, selectedIn
               <p className="font-semibold">{day.day}</p>
               <WeatherIcon
                 iconCode={day.icon}
-                className="h-10 w-10 text-primary"
+                className="h-16 w-16"
               />
               <div className="text-center">
                 <p className="text-base font-bold">{Math.round(day.high)}&deg;</p>

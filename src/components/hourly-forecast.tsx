@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
 import type { HourlyForecast } from '@/lib/types';
 import { ScrollArea, ScrollBar } from './ui/scroll-area';
@@ -21,7 +20,7 @@ const HourlyForecast = ({ data, title = "Hourly Forecast" }: HourlyForecastProps
                 <p className="text-sm font-semibold">{hour.time}</p>
                 <WeatherIcon
                     iconCode={hour.icon}
-                    className="h-8 w-8 text-primary"
+                    className="h-12 w-12"
                 />
                 <p className="text-lg font-bold">{Math.round(hour.temperature)}&deg;F</p>
                 </div>
