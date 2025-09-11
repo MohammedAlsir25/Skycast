@@ -99,12 +99,12 @@ export default function Home() {
     setError(null);
     setAiSummary(null);
     setSelectedDayIndex(0); // Reset to today on new search
-    form.setValue('city', city);
     form.clearErrors();
 
     try {
       const data = await getWeather(city);
       setWeatherData(data);
+      form.setValue('city', data.location.name); // Set city name from response
       const summary = await summarizeWeather(data);
       setAiSummary(summary);
     } catch (err) {
@@ -115,6 +115,7 @@ export default function Home() {
         errorMessage = 'WeatherAPI.com API key is missing. Please add it to your .env file.'
       }
       setError(errorMessage);
+      form.setValue('city', city);
       toast({
         variant: 'destructive',
         title: 'An error occurred',
@@ -131,7 +132,6 @@ export default function Home() {
         position => {
           const { latitude, longitude } = position.coords;
           handleSearch(`${latitude},${longitude}`);
-          form.setValue('city', 'Current Location');
         },
         () => {
           toast({
