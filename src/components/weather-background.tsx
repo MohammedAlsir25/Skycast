@@ -34,7 +34,8 @@ const getWeatherBackgroundClass = (weather: WeatherPeriod | null | undefined): s
 const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
   const [backgroundClass, setBackgroundClass] = useState('bg-default');
   const [previousClass, setPreviousClass] = useState('');
-  const [animationDelay, setAnimationDelay] = useState('-0s');
+  const [transform, setTransform] = useState('rotate(0deg) translateX(45vw) rotate(0deg)');
+  const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
     const newClass = getWeatherBackgroundClass(weather);
@@ -48,32 +49,42 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
-    const totalMinutes = hours * 60 + minutes;
-    
-    let cycleDuration = 0;
-    let startOfCycle = 0;
+
+    let startHour = 6;
+    let endHour = 18;
 
     if (weather?.isDaytime) {
-      // Assuming daytime is roughly 6 AM to 6 PM (12 hours)
-      startOfCycle = 6 * 60; 
-      cycleDuration = 12 * 60;
+        if (hours >= startHour && hours < endHour) {
+            const totalMinutesInCycle = (endHour - startHour) * 60;
+            const elapsedMinutes = (hours - startHour) * 60 + minutes;
+            const percentage = elapsedMinutes / totalMinutesInCycle;
+            // Map percentage (0 to 1) to an angle from 15 to 345 degrees
+            const degrees = 15 + percentage * 330;
+            setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
+            setOpacity(1);
+        } else {
+            setOpacity(0);
+        }
     } else {
-      // Assuming nighttime is 6 PM to 6 AM (12 hours)
-      startOfCycle = 18 * 60;
-      cycleDuration = 12 * 60;
-      if (totalMinutes < startOfCycle) {
-        // Handle time past midnight (e.g., 1 AM is part of the "previous" night cycle)
-        startOfCycle -= 24 * 60;
-      }
+        let currentHour = hours;
+        // Handle nighttime wrapping past midnight
+        if (currentHour < startHour) {
+            currentHour += 24;
+            startHour += 24;
+            endHour += 24;
+        }
+
+        if (currentHour >= 18 && currentHour < 30) { // 6 PM to 6 AM (next day)
+             const totalMinutesInCycle = (30 - 18) * 60;
+             const elapsedMinutes = (currentHour - 18) * 60 + minutes;
+             const percentage = elapsedMinutes / totalMinutesInCycle;
+             const degrees = 15 + percentage * 330;
+             setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
+             setOpacity(1);
+        } else {
+            setOpacity(0);
+        }
     }
-
-    const elapsedMinutes = totalMinutes - startOfCycle;
-    const percentageOfDay = (elapsedMinutes / cycleDuration);
-    
-    // Total animation duration is 60s
-    const delay = -(percentageOfDay * 60);
-    setAnimationDelay(`${delay}s`);
-
   }, [weather]);
 
 
@@ -86,7 +97,7 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
             {weather && (
                 <div 
                     className={cn('celestial-body', weather.isDaytime ? 'sun' : 'moon')}
-                    style={{ animationDelay }}
+                    style={{ transform, opacity, transition: 'transform 1s ease-out, opacity 1s ease-out' }}
                 />
             )}
         </div>
