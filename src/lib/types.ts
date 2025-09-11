@@ -13,7 +13,8 @@ export interface WeatherPeriod {
     startTime: string;
     endTime: string;
     isDaytime: boolean;
-    temperature: number;
+    temperature_f: number;
+    temperature_c: number;
     temperatureUnit: string;
     temperatureTrend: string | null;
     probabilityOfPrecipitation: {
@@ -32,8 +33,10 @@ export interface WeatherPeriod {
 export interface DailyForecast {
     date: string; // YYYY-MM-DD
     day: string; // "Sun", "Mon", etc.
-    high: number;
-    low: number;
+    high_f: number;
+    low_f: number;
+    high_c: number;
+    low_c: number;
     icon: string;
     shortForecast: string;
     periods: WeatherPeriod[];
@@ -41,7 +44,8 @@ export interface DailyForecast {
 
 export interface HourlyForecast {
     time: string; // "1 AM", "2 AM", etc.
-    temperature: number;
+    temperature_f: number;
+    temperature_c: number;
     icon: string;
     date: string; // YYYY-MM-DD
 }
@@ -69,6 +73,7 @@ export interface WeatherAPIResponse {
     current: {
         last_updated_epoch: number;
         temp_f: number;
+        temp_c: number;
         is_day: number;
         condition: {
             text: string;
@@ -85,6 +90,8 @@ export interface WeatherAPIResponse {
             day: {
                 maxtemp_f: number;
                 mintemp_f: number;
+                maxtemp_c: number;
+                mintemp_c: number;
                 maxwind_mph: number;
                 avghumidity: number;
                 daily_chance_of_rain: number;
@@ -97,6 +104,7 @@ export interface WeatherAPIResponse {
                 time_epoch: number;
                 time: string;
                 temp_f: number;
+                temp_c: number;
                 condition: {
                     text: string;
                     icon: string;

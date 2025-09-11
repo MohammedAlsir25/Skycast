@@ -29,8 +29,9 @@ export async function getWeather(city: string): Promise<WeatherData> {
         startTime: new Date(data.current.last_updated_epoch * 1000).toISOString(),
         endTime: new Date(data.current.last_updated_epoch * 1000).toISOString(),
         isDaytime: !!data.current.is_day,
-        temperature: data.current.temp_f,
-        temperatureUnit: 'F',
+        temperature_f: data.current.temp_f,
+        temperature_c: data.current.temp_c,
+        temperatureUnit: 'F', // Default unit
         temperatureTrend: null,
         probabilityOfPrecipitation: { value: data.forecast.forecastday[0].day.daily_chance_of_rain },
         relativeHumidity: { value: data.current.humidity },
@@ -44,8 +45,10 @@ export async function getWeather(city: string): Promise<WeatherData> {
     const dailyForecasts: DailyForecast[] = data.forecast.forecastday.map(fd => ({
         date: fd.date,
         day: new Date(fd.date_epoch * 1000).toLocaleDateString('en-US', { weekday: 'short', timeZone: data.location.tz_id }),
-        high: fd.day.maxtemp_f,
-        low: fd.day.mintemp_f,
+        high_f: fd.day.maxtemp_f,
+        low_f: fd.day.mintemp_f,
+        high_c: fd.day.maxtemp_c,
+        low_c: fd.day.mintemp_c,
         icon: `https:${fd.day.condition.icon}`,
         shortForecast: fd.day.condition.text,
         periods: [
@@ -55,7 +58,8 @@ export async function getWeather(city: string): Promise<WeatherData> {
                 startTime: new Date(fd.date_epoch * 1000).toISOString(),
                 endTime: new Date(fd.date_epoch * 1000).toISOString(),
                 isDaytime: true,
-                temperature: fd.day.maxtemp_f,
+                temperature_f: fd.day.maxtemp_f,
+                temperature_c: fd.day.maxtemp_c,
                 temperatureUnit: 'F',
                 temperatureTrend: null,
                 probabilityOfPrecipitation: { value: fd.day.daily_chance_of_rain },
@@ -72,7 +76,8 @@ export async function getWeather(city: string): Promise<WeatherData> {
     const hourlyForecasts: HourlyForecast[] = data.forecast.forecastday.flatMap(fd => 
         fd.hour.map(hour => ({
             time: new Date(hour.time_epoch * 1000).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: data.location.tz_id }),
-            temperature: hour.temp_f,
+            temperature_f: hour.temp_f,
+            temperature_c: hour.temp_c,
             icon: `https:${hour.condition.icon}`,
             date: fd.date,
         }))

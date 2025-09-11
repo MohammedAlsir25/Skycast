@@ -1,35 +1,42 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
 import type { WeatherLocation, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
+import type { TempUnit } from '@/app/page';
 import WeatherDetails from './weather-details';
 import DailyForecast from './daily-forecast';
 import HourlyForecast from './hourly-forecast';
 import { Separator } from './ui/separator';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
 
 interface WeatherCardProps {
   location: WeatherLocation;
   displayWeather: WeatherPeriod;
-  displayTemp: number | undefined;
   dailyData: DailyForecast[];
   hourlyData: HourlyForecast[];
   onDaySelect: (index: number) => void;
   selectedDayIndex: number;
+  tempUnit: TempUnit;
+  onTempUnitChange: (unit: TempUnit) => void;
 }
 
 const WeatherCard = ({ 
     location, 
     displayWeather, 
-    displayTemp,
     dailyData, 
     hourlyData, 
     onDaySelect, 
-    selectedDayIndex 
+    selectedDayIndex,
+    tempUnit,
+    onTempUnitChange
 }: WeatherCardProps) => {
   const { name, state, country } = location;
 
   const displayDate = new Date(displayWeather.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   const locationName = [name, state, country].filter(Boolean).join(', ');
+
+  const displayTemp = tempUnit === 'F' ? displayWeather.temperature_f : displayWeather.temperature_c;
 
   return (
     <Card className="w-full">
@@ -43,9 +50,16 @@ const WeatherCard = ({
                 <p className="text-lg font-semibold capitalize">
                   {displayWeather.shortForecast}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {selectedDayIndex === 0 ? "Current conditions" : "Forecast"}
-                </p>
+                <div className="flex items-center justify-end space-x-2 mt-2">
+                    <Label htmlFor="temp-unit-switch" className={tempUnit === 'F' ? 'text-foreground' : 'text-muted-foreground'}>&deg;F</Label>
+                    <Switch
+                        id="temp-unit-switch"
+                        checked={tempUnit === 'C'}
+                        onCheckedChange={(checked) => onTempUnitChange(checked ? 'C' : 'F')}
+                        aria-label="Toggle temperature unit"
+                    />
+                    <Label htmlFor="temp-unit-switch" className={tempUnit === 'C' ? 'text-foreground' : 'text-muted-foreground'}>&deg;C</Label>
+                </div>
             </div>
         </div>
       </CardHeader>
@@ -70,9 +84,9 @@ const WeatherCard = ({
            <WeatherDetails period={displayWeather} />
         </div>
         <Separator/>
-        <HourlyForecast data={hourlyData} />
+        <HourlyForecast data={hourlyData} tempUnit={tempUnit} />
         <Separator/>
-        <DailyForecast data={dailyData} onDaySelect={onDaySelect} selectedIndex={selectedDayIndex} />
+        <DailyForecast data={dailyData} onDaySelect={onDaySelect} selectedIndex={selectedDayIndex} tempUnit={tempUnit}/>
       </CardContent>
     </Card>
   );

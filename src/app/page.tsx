@@ -30,6 +30,7 @@ const formSchema = z.object({
 });
 
 type FormSchema = z.infer<typeof formSchema>;
+export type TempUnit = 'F' | 'C';
 
 const getHourlyForSelectedDay = (
   hourly: HourlyForecast[] | undefined,
@@ -45,6 +46,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [tempUnit, setTempUnit] = useState<TempUnit>('F');
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
@@ -91,8 +93,6 @@ export default function Home() {
   const selectedDay = weatherData?.daily[selectedDayIndex];
 
   const displayWeather: WeatherPeriod | null = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
-  const displayTemp = displayWeather?.temperature;
-
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 lg:p-8">
@@ -183,11 +183,12 @@ export default function Home() {
                 <WeatherCard 
                   location={weatherData.location}
                   displayWeather={displayWeather}
-                  displayTemp={displayTemp}
                   dailyData={weatherData.daily}
                   hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
                   onDaySelect={setSelectedDayIndex}
                   selectedDayIndex={selectedDayIndex}
+                  tempUnit={tempUnit}
+                  onTempUnitChange={setTempUnit}
                 />
               </motion.div>
             )}
