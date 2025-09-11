@@ -1,10 +1,7 @@
 import type { WeatherData } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Globe } from 'lucide-react';
 
 interface NearbyCitiesProps {
   weatherDataList: WeatherData[];
@@ -39,34 +36,26 @@ const NearbyCities = ({ weatherDataList, loading, tempUnit, onCityClick }: Nearb
   const hasCities = weatherDataList.length > 0;
 
   return (
-    <div>
-        <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Elsewhere
-            </h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {loading && (
-                <>
-                    <Skeleton className="h-[88px] w-full" />
-                    <Skeleton className="h-[88px] w-full" />
-                    <Skeleton className="h-[88px] w-full" />
-                    <Skeleton className="h-[88px] w-full" />
-                </>
-            )}
-            {!loading && hasCities && weatherDataList.map((weatherData) => (
-                <NearbyCityCard 
-                    key={weatherData.location.name} 
-                    weatherData={weatherData} 
-                    tempUnit={tempUnit}
-                    onClick={() => onCityClick(weatherData.location.name)}
-                />
-            ))}
-             {!loading && !hasCities && (
-                <p className="text-muted-foreground col-span-2 text-center">No nearby cities to display.</p>
-            )}
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {loading && (
+            <>
+                <Skeleton className="h-[88px] w-full" />
+                <Skeleton className="h-[88px] w-full" />
+                <Skeleton className="h-[88px] w-full" />
+                <Skeleton className="h-[88px] w-full" />
+            </>
+        )}
+        {!loading && hasCities && weatherDataList.map((weatherData) => (
+            <NearbyCityCard 
+                key={weatherData.location.name} 
+                weatherData={weatherData} 
+                tempUnit={tempUnit}
+                onClick={() => onCityClick(weatherData.location.name)}
+            />
+        ))}
+         {!loading && !hasCities && (
+            <p className="text-muted-foreground col-span-2 text-center">No nearby cities to display.</p>
+        )}
     </div>
   );
 };

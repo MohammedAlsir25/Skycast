@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -21,13 +21,13 @@ import { getWeather } from '@/app/actions';
 import { summarizeWeather } from '@/ai/flows/weather-summary-flow';
 import { findNearbyCities } from '@/ai/flows/nearby-cities-flow';
 import { getClothingRecommendation } from '@/ai/flows/clothing-recommendation-flow';
-import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, AirQuality } from '@/lib/types';
+import type { WeatherData, DailyForecast, HourlyForecast } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
-import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import NearbyCities from '@/components/nearby-cities';
+import CurrentWeather from '@/components/current-weather';
+import InfoTabs from '@/components/info-tabs';
 
 const formSchema = z.object({
   city: z
@@ -43,6 +43,18 @@ const getHourlyForSelectedDay = (
   selectedDay: DailyForecast | undefined
 ): HourlyForecast[] => {
   if (!hourly || !selectedDay) return [];
+  // Show all hourly data if it's the current day (index 0)
+  if (hourly.some(h => new Date(h.date).toDateString() === new Date().toDateString())) {
+    const today = new Date();
+    const currentHour = today.getHours();
+    // Filter to show from the current hour onwards for today
+    return hourly.filter(h => {
+        const hourDate = new Date(h.date);
+        if (hourDate.toDateString() !== today.toDateString()) return true;
+        const forecastHour = parseInt(h.time.split(':')[0], 10) + (h.time.includes('PM') && parseInt(h.time.split(':')[0], 10) !== 12 ? 12 : 0);
+        return hourDate.toDateString() === today.toDateString() && forecastHour >= currentHour;
+    });
+  }
   return hourly.filter(h => h.date === selectedDay.date);
 };
 
@@ -168,8 +180,7 @@ export default function Home() {
   }, []);
 
   const selectedDay = weatherData?.daily[selectedDayIndex];
-
-  const displayWeather: WeatherPeriod | null = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
+  const displayWeather = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
   
   return (
     <>
@@ -271,30 +282,31 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="absolute inset-0"
+                  className="space-y-6"
                 >
-                  <WeatherCard 
+                  <CurrentWeather
                     location={weatherData.location}
                     displayWeather={displayWeather}
-                    dailyData={weatherData.daily}
-                    hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
                     aiSummary={aiSummary}
                     clothingRecommendation={clothingRecommendation}
+                    selectedDay={selectedDay}
+                    tempUnit={tempUnit}
+                    onTempUnitChange={setTempUnit}
+                  />
+
+                  <InfoTabs 
+                    dailyData={weatherData.daily}
+                    hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
                     airQuality={weatherData.airQuality}
                     alerts={weatherData.alerts}
+                    nearbyCities={nearbyCitiesWeather}
+                    loadingNearby={loadingNearby}
                     onDaySelect={setSelectedDayIndex}
                     selectedDayIndex={selectedDayIndex}
                     tempUnit={tempUnit}
-                    onTempUnitChange={setTempUnit}
-                    nearbyCities={
-                      <NearbyCities 
-                        weatherDataList={nearbyCitiesWeather} 
-                        loading={loadingNearby}
-                        tempUnit={tempUnit}
-                        onCityClick={handleSearch}
-                      />
-                    }
+                    onCityClick={handleSearch}
                   />
+
                 </motion.div>
               )}
             </AnimatePresence>

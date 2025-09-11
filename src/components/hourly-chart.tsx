@@ -9,14 +9,15 @@ import {
 } from '@/components/ui/chart';
 import type { HourlyForecast } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
-
-type ChartDataType = 'temperature' | 'precip' | 'humidity' | 'wind';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Droplets, Wind, Thermometer } from 'lucide-react';
 
 interface HourlyChartProps {
   data: HourlyForecast[];
-  dataType: ChartDataType;
   tempUnit: TempUnit;
 }
+
+type ChartDataType = 'temperature' | 'precip' | 'humidity' | 'wind';
 
 const chartConfigs = {
   temperature: {
@@ -41,12 +42,12 @@ const chartConfigs = {
   },
 };
 
-const HourlyChart = ({
-  data,
-  dataType,
-  tempUnit,
-}: HourlyChartProps) => {
-  if (!data || data.length === 0) return null;
+const ChartComponent = ({ data, dataType, tempUnit }: { data: HourlyForecast[], dataType: ChartDataType, tempUnit: TempUnit }) => {
+   if (!data || data.length === 0) return (
+     <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+        No hourly data available for this day.
+     </div>
+   );
   const config = chartConfigs[dataType];
 
   const chartData = React.useMemo(() => data.map(hour => {
@@ -158,5 +159,32 @@ const HourlyChart = ({
       </div>
   );
 };
+
+
+const HourlyChart = ({ data, tempUnit }: HourlyChartProps) => {
+  return (
+    <Tabs defaultValue="temperature">
+        <TabsList className='grid w-full grid-cols-4'>
+            <TabsTrigger value="temperature"><Thermometer className='h-4 w-4 mr-2'/>Temp</TabsTrigger>
+            <TabsTrigger value="precip"><Droplets className='h-4 w-4 mr-2'/>Precip</TabsTrigger>
+            <TabsTrigger value="humidity"><Droplets className='h-4 w-4 mr-2'/>Humidity</TabsTrigger>
+            <TabsTrigger value="wind"><Wind className='h-4 w-4 mr-2'/>Wind</TabsTrigger>
+        </TabsList>
+        <TabsContent value="temperature">
+            <ChartComponent data={data} dataType='temperature' tempUnit={tempUnit} />
+        </TabsContent>
+        <TabsContent value="precip">
+            <ChartComponent data={data} dataType='precip' tempUnit={tempUnit} />
+        </TabsContent>
+         <TabsContent value="humidity">
+            <ChartComponent data={data} dataType='humidity' tempUnit={tempUnit} />
+        </TabsContent>
+         <TabsContent value="wind">
+            <ChartComponent data={data} dataType='wind' tempUnit={tempUnit} />
+        </TabsContent>
+    </Tabs>
+  )
+}
+
 
 export default HourlyChart;
