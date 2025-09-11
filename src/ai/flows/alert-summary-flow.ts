@@ -38,14 +38,19 @@ const alertSummaryFlow = ai.defineFlow(
       - Description: ${alert.desc}
       - Instruction: ${alert.instruction}
     `;
-
-    const { output } = await ai.generate({
-      prompt,
-      output: {
-        schema: AlertSummaryOutputSchema,
-      },
-    });
-
-    return output!;
+    
+    try {
+      const { output } = await ai.generate({
+        prompt,
+        output: {
+          schema: AlertSummaryOutputSchema,
+        },
+      });
+      return output!;
+    } catch (error) {
+       console.error("AI alert summary failed, returning default instruction.", error);
+       // If the AI call fails, return the official instruction or a generic message.
+       return { summary: alert.instruction || "Please read the official alert for instructions." };
+    }
   }
 );
