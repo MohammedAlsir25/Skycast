@@ -47,9 +47,6 @@ const CurrentWeather = ({
                         <CardDescription>{displayDate}</CardDescription>
                     </div>
                     <div className="text-right">
-                        <p className="text-lg font-semibold capitalize">
-                        {displayWeather.shortForecast}
-                        </p>
                         <div className="flex items-center justify-end space-x-1 mt-2 text-lg">
                             <Button 
                                 variant="ghost" 
@@ -83,6 +80,9 @@ const CurrentWeather = ({
                     <p className="text-3xl font-bold">{locationName}</p>
                     <p className="font-headline text-8xl font-bold">
                         {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
+                    </p>
+                    <p className="text-lg font-semibold capitalize -mt-4">
+                        {displayWeather.shortForecast}
                     </p>
                     <Separator className="my-4 w-1/2" />
                     <WeatherDetails period={displayWeather} sunrise={selectedDay?.sunrise} sunset={selectedDay?.sunset} />
