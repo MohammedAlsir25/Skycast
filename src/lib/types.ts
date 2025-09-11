@@ -114,15 +114,32 @@ export interface CurrentWeatherData {
 
 export interface DailyWeatherData {
   dt: number;
+  sunrise: number;
+  sunset: number;
   temp: {
+    day: number;
     min: number;
     max: number;
+    night: number;
+    eve: number;
+    morn: number;
   };
-  weather: {
-      icon: string;
-      description: string;
-  }[];
+   feels_like: {
+    day: number;
+    night: number;
+    eve: number;
+    morn: number;
+  };
+  pressure: number;
+  humidity: number;
+  wind_speed: number;
+  wind_deg: number;
+  weather: WeatherInfo[];
+  clouds: number;
+  pop: number;
+  uvi: number;
 }
+
 
 export interface WeatherData {
   current: CurrentWeatherData;

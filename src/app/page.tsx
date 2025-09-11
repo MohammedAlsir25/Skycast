@@ -98,17 +98,17 @@ export default function Home() {
   // to pass to WeatherDetails and WeatherCard's main display
   const displayWeather = selectedDayIndex === 0 && weatherData ? weatherData.current : selectedDayWeather ? {
     dt: selectedDayWeather.dt,
-    sunrise: 0, // Not available for future days in this API structure
-    sunset: 0, // Not available for future days in this API structure
+    sunrise: selectedDayWeather.sunrise,
+    sunset: selectedDayWeather.sunset,
     temp: selectedDayWeather.temp.max, // Show max temp for the day
-    feels_like: selectedDayWeather.temp.max, // Approximation
-    pressure: 1012, // Average, not available
-    humidity: 70, // Average, not available
-    visibility: 10000, // Average, not available
-    wind_speed: 5, // Average, not available
-    wind_deg: 180, // Average, not available
+    feels_like: selectedDayWeather.feels_like.day,
+    pressure: selectedDayWeather.pressure,
+    humidity: selectedDayWeather.humidity,
+    visibility: 10000, // Not available in daily forecast
+    wind_speed: selectedDayWeather.wind_speed,
+    wind_deg: selectedDayWeather.wind_deg,
     weather: selectedDayWeather.weather,
-    clouds: 50, // Average, not available
+    clouds: selectedDayWeather.clouds,
   } : null;
 
 
