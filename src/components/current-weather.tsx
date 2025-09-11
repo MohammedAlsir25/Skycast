@@ -79,19 +79,17 @@ const CurrentWeather = ({
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex flex-col items-center gap-4 text-center md:flex-row md:gap-8">
-                    <div className="flex items-center">
-                        <div>
-                        <p className="text-3xl font-bold">{locationName}</p>
+                <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="flex flex-col items-center">
                         <p className="font-headline text-8xl font-bold">
                             {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
                         </p>
+                        <p className="text-3xl font-bold">{locationName}</p>
                         <p className="text-lg capitalize text-muted-foreground">
                             {displayWeather.name}
                         </p>
-                        </div>
                     </div>
-                    <Separator orientation='vertical' className="hidden md:flex h-24"/>
+                    <Separator className="my-4 w-1/2" />
                     <WeatherDetails period={displayWeather} sunrise={selectedDay?.sunrise} sunset={selectedDay?.sunset} />
                 </div>
                 
