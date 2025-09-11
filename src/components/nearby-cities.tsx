@@ -16,7 +16,7 @@ const NearbyCityCard = ({ weatherData, tempUnit, onClick }: { weatherData: Weath
   
   return (
     <button
-      className="flex items-center justify-between p-3 rounded-lg bg-card hover:bg-accent/80 transition-colors cursor-pointer border w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="flex items-center justify-between p-3 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 transition-colors cursor-pointer border w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       onClick={onClick}
       aria-label={`View weather for ${location.name}`}
     >

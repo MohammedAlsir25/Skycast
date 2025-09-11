@@ -35,22 +35,13 @@ const AirQualityIndex = ({ data }: AirQualityIndexProps) => {
                     </h3>
                     <span className={cn("font-bold text-lg", color)}>{label}</span>
                 </div>
-                 <div className="relative mb-4">
-                    <div className="absolute w-full top-0">
-                         <div className={cn("h-2.5 rounded-full", color)} style={{ width: `${(percentage / 100) * 100}%` }}>
-                            <div className="relative">
-                                <div
-                                className="absolute h-4 w-4 rounded-full border-2 border-background"
-                                style={{ 
-                                    left: `calc(${percentage}% - 8px)`, 
-                                    top: '-3px',
-                                    backgroundColor: 'hsl(var(--primary))'
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="w-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 rounded-full h-2.5"></div>
+                 <div className="relative mb-4 h-2.5 w-full rounded-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500">
+                    <div
+                    className="absolute -top-1 h-4 w-1 rounded-full border-2 border-background bg-foreground"
+                    style={{ 
+                        left: `calc(${percentage}% - 2px)`, 
+                        }}
+                    />
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 text-center">
                     {description}

@@ -204,7 +204,7 @@ export default function Home() {
     <>
       <WeatherBackground weatherData={weatherData} />
       <main className="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 lg:p-8 relative z-10">
-        <div className="w-full max-w-4xl space-y-6">
+        <div className="w-full max-w-5xl space-y-6">
           <div className="flex w-full items-center justify-between gap-4">
             <div className='flex items-center gap-2 flex-shrink-0'>
               <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -240,7 +240,7 @@ export default function Home() {
                                 <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                                 <Input
                                 placeholder="Enter a city name..."
-                                className="pl-10 text-base bg-card/80 backdrop-blur-sm"
+                                className="pl-10 text-base bg-card/60 backdrop-blur-md"
                                 {...field}
                                 aria-label="City Name"
                                 />
@@ -288,7 +288,7 @@ export default function Home() {
 
           <div className="relative min-h-[550px]">
               {loading && (
-                  <div className="absolute inset-0 flex h-full items-center justify-center bg-background/30 backdrop-blur-sm rounded-lg z-20">
+                  <div className="absolute inset-0 flex h-full items-center justify-center bg-background/50 backdrop-blur-md rounded-lg z-20">
                       <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
                   </div>
               )}

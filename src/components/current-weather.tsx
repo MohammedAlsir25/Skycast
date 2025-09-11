@@ -42,7 +42,7 @@ const CurrentWeather = ({
     const lowTemp = tempUnit === 'F' ? selectedDay?.low_f : selectedDay?.low_c;
 
     return (
-        <Card className="w-full bg-card/80 backdrop-blur-sm">
+        <Card className="w-full bg-slate-900/50 backdrop-blur-md">
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
@@ -99,13 +99,13 @@ const CurrentWeather = ({
                 </div>
                 
                 {aiSummary && (
-                    <div className="flex items-start gap-4 rounded-lg border bg-accent/50 p-4 text-sm text-accent-foreground">
+                     <div className="flex items-start gap-4 rounded-lg border bg-accent/10 p-4 text-sm text-accent-foreground border-accent/20">
                         <p className='leading-relaxed'>{aiSummary}</p>
                     </div>
                 )}
 
                 {clothingRecommendation && (
-                    <div className="flex items-center gap-4 rounded-lg border bg-accent/50 p-4 text-sm text-accent-foreground">
+                     <div className="flex items-center gap-4 rounded-lg border bg-accent/10 p-4 text-sm text-accent-foreground border-accent/20">
                         <Shirt className="h-6 w-6 shrink-0" />
                         <p>{clothingRecommendation}</p>
                     </div>

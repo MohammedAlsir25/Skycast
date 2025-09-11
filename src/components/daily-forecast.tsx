@@ -24,7 +24,7 @@ const DailyForecastComponent = ({ data, onDaySelect, selectedIndex, tempUnit }: 
             className={cn(
               "flex flex-col items-center space-y-2 p-3 rounded-lg border text-sm transition-colors w-full",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-              selectedIndex === index ? "bg-accent ring-2 ring-primary" : "bg-card hover:bg-accent/80"
+              selectedIndex === index ? "bg-primary/90 text-primary-foreground ring-2 ring-primary-foreground" : "bg-slate-800/60 hover:bg-slate-700/60"
             )}
             onClick={() => onDaySelect(index)}
             aria-label={`Select forecast for ${day.day}`}

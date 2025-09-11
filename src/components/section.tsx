@@ -10,7 +10,7 @@ interface SectionProps {
 
 export const Section = ({ icon, title, children, className }: SectionProps) => {
     return (
-        <Card className="w-full bg-card/80 backdrop-blur-sm">
+        <Card className="w-full bg-slate-900/50 backdrop-blur-md">
             <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-lg font-semibold">
                     {icon}
