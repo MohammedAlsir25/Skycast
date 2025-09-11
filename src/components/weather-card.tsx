@@ -6,12 +6,12 @@ import WeatherDetails from './weather-details';
 import DailyForecast from './daily-forecast';
 import HourlyChart from './hourly-chart';
 import { Separator } from './ui/separator';
-import { Switch } from './ui/switch';
-import { Label } from './ui/label';
+import { Button } from './ui/button';
 import { Droplets, Wind, Thermometer, Shirt } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AirQualityIndex from './air-quality-index';
 import WeatherAlerts from './weather-alerts';
+import { cn } from '@/lib/utils';
 
 
 interface WeatherCardProps {
@@ -73,15 +73,30 @@ const WeatherCard = ({
                 <p className="text-lg font-semibold capitalize">
                   {displayWeather.shortForecast}
                 </p>
-                <div className="flex items-center justify-end space-x-2 mt-2">
-                    <Label htmlFor="temp-unit-switch" className={tempUnit === 'F' ? 'text-foreground' : 'text-muted-foreground'}>&deg;F</Label>
-                    <Switch
-                        id="temp-unit-switch"
-                        checked={tempUnit === 'C'}
-                        onCheckedChange={(checked) => onTempUnitChange(checked ? 'C' : 'F')}
-                        aria-label="Toggle temperature unit"
-                    />
-                    <Label htmlFor="temp-unit-switch" className={tempUnit === 'C' ? 'text-foreground' : 'text-muted-foreground'}>&deg;C</Label>
+                <div className="flex items-center justify-end space-x-1 mt-2 text-lg">
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className={cn(
+                            "p-1 h-auto font-bold",
+                            tempUnit === 'C' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
+                        )}
+                        onClick={() => onTempUnitChange('C')}
+                    >
+                        &deg;C
+                    </Button>
+                    <span className='text-muted-foreground'>/</span>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className={cn(
+                            "p-1 h-auto font-bold",
+                            tempUnit === 'F' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
+                        )}
+                        onClick={() => onTempUnitChange('F')}
+                    >
+                        &deg;F
+                    </Button>
                 </div>
             </div>
         </div>
