@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin, LocateFixed, Map } from 'lucide-react';
-import dynamic from 'next/dynamic';
+import { Search, LoaderCircle, MapPin, LocateFixed } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,11 +27,6 @@ import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import NearbyCities from '@/components/nearby-cities';
-
-const MapModal = dynamic(() => import('@/components/map-modal'), {
-  ssr: false,
-});
-
 
 const formSchema = z.object({
   city: z
@@ -60,7 +54,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [tempUnit, setTempUnit] = useState<TempUnit>('F');
-  const [isMapOpen, setIsMapOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
@@ -168,8 +161,6 @@ export default function Home() {
 
   const displayWeather: WeatherPeriod | null = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
   
-  const allCitiesOnMap = weatherData ? [weatherData, ...nearbyCitiesWeather] : nearbyCitiesWeather;
-
   return (
     <>
       <WeatherBackground weatherData={weatherData} />
@@ -288,7 +279,6 @@ export default function Home() {
                         loading={loadingNearby}
                         tempUnit={tempUnit}
                         onCityClick={handleSearch}
-                        onViewMapClick={() => setIsMapOpen(true)}
                       />
                     }
                   />
@@ -298,12 +288,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-      <MapModal
-        isOpen={isMapOpen}
-        onClose={() => setIsMapOpen(false)}
-        weatherDataList={allCitiesOnMap}
-        tempUnit={tempUnit}
-      />
     </>
   );
 }

@@ -4,14 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Globe, Map } from 'lucide-react';
+import { Globe } from 'lucide-react';
 
 interface NearbyCitiesProps {
   weatherDataList: WeatherData[];
   loading: boolean;
   tempUnit: TempUnit;
   onCityClick: (city: string) => void;
-  onViewMapClick: () => void;
 }
 
 const NearbyCityCard = ({ weatherData, tempUnit, onClick }: { weatherData: WeatherData, tempUnit: TempUnit, onClick: () => void }) => {
@@ -36,7 +35,7 @@ const NearbyCityCard = ({ weatherData, tempUnit, onClick }: { weatherData: Weath
 };
 
 
-const NearbyCities = ({ weatherDataList, loading, tempUnit, onCityClick, onViewMapClick }: NearbyCitiesProps) => {
+const NearbyCities = ({ weatherDataList, loading, tempUnit, onCityClick }: NearbyCitiesProps) => {
   const hasCities = weatherDataList.length > 0;
 
   return (
@@ -46,12 +45,6 @@ const NearbyCities = ({ weatherDataList, loading, tempUnit, onCityClick, onViewM
                 <Globe className="h-5 w-5" />
                 Elsewhere
             </h3>
-            {hasCities && (
-                <Button variant="ghost" size="sm" onClick={onViewMapClick}>
-                    <Map className="h-4 w-4 mr-2" />
-                    View on Map
-                </Button>
-            )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {loading && (
