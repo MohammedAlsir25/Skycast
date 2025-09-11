@@ -21,7 +21,7 @@ import { getWeather } from '@/app/actions';
 import { summarizeWeather } from '@/ai/flows/weather-summary-flow';
 import { findNearbyCities } from '@/ai/flows/nearby-cities-flow';
 import { getClothingRecommendation } from '@/ai/flows/clothing-recommendation-flow';
-import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
+import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, AirQuality } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import WeatherCard from '@/components/weather-card';
@@ -100,7 +100,7 @@ export default function Home() {
         setAiSummary(summary);
       } catch (err) {
         console.error("AI summary failed:", err);
-        setAiSummary(null);
+        setAiSummary(null); // Gracefully handle AI summary failure
       }
 
       try {
@@ -280,6 +280,7 @@ export default function Home() {
                     hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
                     aiSummary={aiSummary}
                     clothingRecommendation={clothingRecommendation}
+                    airQuality={weatherData.airQuality}
                     onDaySelect={setSelectedDayIndex}
                     selectedDayIndex={selectedDayIndex}
                     tempUnit={tempUnit}

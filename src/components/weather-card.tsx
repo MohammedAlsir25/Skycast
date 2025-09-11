@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
-import type { WeatherLocation, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
+import type { WeatherLocation, DailyForecast, HourlyForecast, WeatherPeriod, AirQuality } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
 import WeatherDetails from './weather-details';
 import DailyForecast from './daily-forecast';
@@ -10,6 +10,7 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Droplets, Wind, Thermometer, Shirt } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AirQualityIndex from './air-quality-index';
 
 
 interface WeatherCardProps {
@@ -19,6 +20,7 @@ interface WeatherCardProps {
   hourlyData: HourlyForecast[];
   aiSummary: string | null;
   clothingRecommendation: string | null;
+  airQuality: AirQuality | null | undefined;
   onDaySelect: (index: number) => void;
   selectedDayIndex: number;
   tempUnit: TempUnit;
@@ -33,6 +35,7 @@ const WeatherCard = ({
     hourlyData,
     aiSummary,
     clothingRecommendation,
+    airQuality,
     onDaySelect, 
     selectedDayIndex,
     tempUnit,
@@ -112,6 +115,8 @@ const WeatherCard = ({
                 <p>{clothingRecommendation}</p>
             </div>
         )}
+        
+        {airQuality && <AirQualityIndex data={airQuality} />}
 
         <Separator/>
         <div>

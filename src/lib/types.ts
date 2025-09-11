@@ -56,11 +56,20 @@ export const HourlyForecastSchema = z.object({
     date: z.string(),
 });
 
+export const AirQualitySchema = z.object({
+    usEpaIndex: z.number().optional(),
+    label: z.string(),
+    description: z.string(),
+    color: z.string(),
+});
+
+
 export const WeatherDataSchema = z.object({
     location: WeatherLocationSchema,
     current: WeatherPeriodSchema,
     daily: z.array(DailyForecastSchema),
     hourly: z.array(HourlyForecastSchema),
+    airQuality: AirQualitySchema.optional(),
 });
 
 // TypeScript Types
@@ -68,6 +77,7 @@ export type WeatherLocation = z.infer<typeof WeatherLocationSchema>;
 export type WeatherPeriod = z.infer<typeof WeatherPeriodSchema>;
 export type DailyForecast = z.infer<typeof DailyForecastSchema>;
 export type HourlyForecast = z.infer<typeof HourlyForecastSchema>;
+export type AirQuality = z.infer<typeof AirQualitySchema>;
 export type WeatherData = z.infer<typeof WeatherDataSchema>;
 
 
@@ -95,6 +105,9 @@ export interface WeatherAPIResponse {
         wind_mph: number;
         wind_dir: string;
         humidity: number;
+        air_quality?: {
+            'us-epa-index': number;
+        }
     };
     forecast: {
         forecastday: {

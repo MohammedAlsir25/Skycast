@@ -1,15 +1,28 @@
 'use server';
 
-import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, WeatherAPIResponse } from '@/lib/types';
+import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, WeatherAPIResponse, AirQuality } from '@/lib/types';
 
 const API_KEY = process.env.WEATHERAPI_API_KEY;
+
+const getAqiInfo = (index: number): { label: string; description: string; color: string } => {
+    switch (index) {
+        case 1: return { label: 'Good', description: 'Air quality is satisfactory, and air pollution poses little or no risk.', color: 'text-green-500' };
+        case 2: return { label: 'Moderate', description: 'Air quality is acceptable. However, there may be a risk for some people, particularly those who are unusually sensitive to air pollution.', color: 'text-yellow-500' };
+        case 3: return { label: 'Unhealthy for Sensitive Groups', description: 'Members of sensitive groups may experience health effects. The general public is less likely to be affected.', color: 'text-orange-500' };
+        case 4: return { label: 'Unhealthy', description: 'Some members of the general public may experience health effects; members of sensitive groups may experience more serious health effects.', color: 'text-red-500' };
+        case 5: return { label: 'Very Unhealthy', description: 'Health alert: The risk of health effects is increased for everyone.', color: 'text-purple-500' };
+        case 6: return { label: 'Hazardous', description: 'Health warning of emergency conditions: everyone is more likely to be affected.', color: 'text-maroon-500' }; // Assuming a maroon color might need to be configured in tailwind
+        default: return { label: 'Unknown', description: 'AQI data is not available.', color: 'text-gray-500' };
+    }
+}
+
 
 export async function getWeather(city: string): Promise<WeatherData> {
     if (!API_KEY) {
         throw new Error("WeatherAPI.com API key is missing. Please add WEATHERAPI_API_KEY to your .env file.");
     }
     
-    const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=7&aqi=no&alerts=no`;
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=7&aqi=yes&alerts=no`;
     
     const response = await fetch(url, { headers: { 'User-Agent': 'Skycast Weather App' } });
 
@@ -86,6 +99,13 @@ export async function getWeather(city: string): Promise<WeatherData> {
             is_day: !!hour.is_day,
         }))
     );
+    
+    const usEpaIndex = data.current.air_quality?.['us-epa-index'];
+    const aqiInfo = getAqiInfo(usEpaIndex);
+    const airQuality: AirQuality = {
+        usEpaIndex: usEpaIndex,
+        ...aqiInfo,
+    };
 
     return {
         location: {
@@ -99,5 +119,6 @@ export async function getWeather(city: string): Promise<WeatherData> {
         current: currentConditions,
         daily: dailyForecasts,
         hourly: hourlyForecasts,
+        airQuality: airQuality,
     };
 }
