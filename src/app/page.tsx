@@ -37,6 +37,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
@@ -50,6 +51,7 @@ export default function Home() {
     setLoading(true);
     setSuggestions([]);
     setError(null);
+    setSelectedDayIndex(0);
     form.setValue('city', city);
     form.clearErrors();
 
@@ -89,6 +91,26 @@ export default function Home() {
     handleSearch('New York');
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const selectedDayWeather = weatherData?.daily[selectedDayIndex];
+
+  // We need to construct a `CurrentWeatherData`-like object for the selected day
+  // to pass to WeatherDetails and WeatherCard's main display
+  const displayWeather = selectedDayIndex === 0 && weatherData ? weatherData.current : selectedDayWeather ? {
+    dt: selectedDayWeather.dt,
+    sunrise: 0, // Not available for future days in this API structure
+    sunset: 0, // Not available for future days in this API structure
+    temp: selectedDayWeather.temp.max, // Show max temp for the day
+    feels_like: selectedDayWeather.temp.max, // Approximation
+    pressure: 1012, // Average, not available
+    humidity: 70, // Average, not available
+    visibility: 10000, // Average, not available
+    wind_speed: 5, // Average, not available
+    wind_deg: 180, // Average, not available
+    weather: selectedDayWeather.weather,
+    clouds: 50, // Average, not available
+  } : null;
+
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 lg:p-8">
@@ -193,16 +215,21 @@ export default function Home() {
                 </div>
             )}
           <AnimatePresence>
-            {weatherData && !loading && (
+            {weatherData && displayWeather && !loading && (
               <motion.div
-                key="weather-card"
+                key={selectedDayIndex}
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.3 }}
                 className="absolute inset-0"
               >
-                <WeatherCard data={weatherData} />
+                <WeatherCard 
+                  data={{ ...weatherData, current: displayWeather }} 
+                  dailyData={weatherData.daily}
+                  onDaySelect={setSelectedDayIndex}
+                  selectedDayIndex={selectedDayIndex}
+                />
               </motion.div>
             )}
           </AnimatePresence>

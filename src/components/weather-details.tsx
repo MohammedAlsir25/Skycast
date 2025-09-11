@@ -3,6 +3,7 @@ import type { CurrentWeatherData } from '@/lib/types';
 
 interface WeatherDetailsProps {
   data: CurrentWeatherData;
+  isToday: boolean;
 }
 
 const formatTime = (timestamp: number) =>
@@ -12,27 +13,36 @@ const formatTime = (timestamp: number) =>
     hour12: true,
   });
 
-const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: string, value: string | number }) => (
+const DetailItem = ({ icon, label, value, unit }: { icon: React.ReactNode, label: string, value: string | number, unit?: string }) => (
     <div className="flex items-center gap-3">
         {icon}
         <div>
             <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="text-base font-semibold">{value}</p>
+            <p className="text-base font-semibold">{value}{unit}</p>
         </div>
     </div>
 )
 
-const WeatherDetails = ({ data }: WeatherDetailsProps) => {
+const WeatherDetails = ({ data, isToday }: WeatherDetailsProps) => {
   const { humidity, wind_speed, pressure, visibility, sunrise, sunset } = data;
   
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
-        <DetailItem icon={<Droplets className="h-6 w-6 text-primary" />} label="Humidity" value={`${humidity}%`} />
-        <DetailItem icon={<Wind className="h-6 w-6 text-primary" />} label="Wind Speed" value={`${wind_speed.toFixed(1)} m/s`} />
-        <DetailItem icon={<Gauge className="h-6 w-6 text-primary" />} label="Pressure" value={`${pressure} hPa`} />
-        <DetailItem icon={<Eye className="h-6 w-6 text-primary" />} label="Visibility" value={`${(visibility / 1000).toFixed(1)} km`} />
-        <DetailItem icon={<Sunrise className="h-6 w-6 text-primary" />} label="Sunrise" value={formatTime(sunrise)} />
-        <DetailItem icon={<Sunset className="h-6 w-6 text-primary" />} label="Sunset" value={formatTime(sunset)} />
+        <DetailItem icon={<Droplets className="h-6 w-6 text-primary" />} label="Humidity" value={humidity} unit="%"/>
+        <DetailItem icon={<Wind className="h-6 w-6 text-primary" />} label="Wind Speed" value={wind_speed.toFixed(1)} unit=" m/s" />
+        <DetailItem icon={<Gauge className="h-6 w-6 text-primary" />} label="Pressure" value={pressure} unit=" hPa" />
+        <DetailItem icon={<Eye className="h-6 w-6 text-primary" />} label="Visibility" value={(visibility / 1000).toFixed(1)} unit=" km"/>
+        {isToday ? (
+          <>
+            <DetailItem icon={<Sunrise className="h-6 w-6 text-primary" />} label="Sunrise" value={formatTime(sunrise)} />
+            <DetailItem icon={<Sunset className="h-6 w-6 text-primary" />} label="Sunset" value={formatTime(sunset)} />
+          </>
+        ) : (
+          <>
+            <div className="col-span-1" />
+            <div className="col-span-1" />
+          </>
+        )}
     </div>
   );
 };

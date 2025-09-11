@@ -1,19 +1,29 @@
 import WeatherIcon from '@/components/weather-icon';
 import type { DailyWeatherData } from '@/lib/types';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface DailyForecastProps {
   data: DailyWeatherData[];
   title?: string;
+  onDaySelect: (index: number) => void;
+  selectedIndex: number;
 }
 
-const DailyForecast = ({ data, title = "5-Day Forecast" }: DailyForecastProps) => {
+const DailyForecast = ({ data, title = "7-Day Forecast", onDaySelect, selectedIndex }: DailyForecastProps) => {
   return (
     <div>
         <h3 className="text-lg font-bold mb-4">{title}</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-4">
           {data.map((day, index) => (
-            <div key={index} className="flex flex-col items-center space-y-2 p-3 bg-card rounded-lg border hover:bg-accent transition-colors">
+            <div 
+              key={index} 
+              className={cn(
+                "flex flex-col items-center space-y-2 p-3 rounded-lg border transition-colors cursor-pointer",
+                selectedIndex === index ? "bg-accent ring-2 ring-primary" : "bg-card hover:bg-accent"
+              )}
+              onClick={() => onDaySelect(index)}
+            >
               <p className="font-semibold">{format(new Date(day.dt * 1000), 'eee')}</p>
               <WeatherIcon
                 iconCode={day.weather[0].icon}

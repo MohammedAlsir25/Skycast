@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
-import type { WeatherData } from '@/lib/types';
+import type { WeatherData, DailyWeatherData } from '@/lib/types';
 import WeatherDetails from './weather-details';
 import DailyForecast from './daily-forecast';
 import { Separator } from './ui/separator';
 
 interface WeatherCardProps {
   data: WeatherData;
+  dailyData: DailyWeatherData[];
+  onDaySelect: (index: number) => void;
+  selectedDayIndex: number;
 }
 
-const WeatherCard = ({ data }: WeatherCardProps) => {
+const WeatherCard = ({ data, dailyData, onDaySelect, selectedDayIndex }: WeatherCardProps) => {
   const { current, name, sys } = data;
   const weatherInfo = current.weather[0];
 
@@ -26,7 +29,7 @@ const WeatherCard = ({ data }: WeatherCardProps) => {
                 Feels like {Math.round(current.feels_like)}&deg;
                 </p>
                 <p className="text-xs text-muted-foreground">
-                The real feel temperature
+                  {selectedDayIndex === 0 ? "The real feel temperature" : "Estimated real feel"}
                 </p>
             </div>
         </div>
@@ -48,10 +51,10 @@ const WeatherCard = ({ data }: WeatherCardProps) => {
             </div>
            </div>
            <Separator orientation='vertical' className="hidden md:flex h-24"/>
-           <WeatherDetails data={data.current} />
+           <WeatherDetails data={data.current} isToday={selectedDayIndex === 0} />
         </div>
         <Separator/>
-        <DailyForecast data={data.daily} />
+        <DailyForecast data={dailyData} onDaySelect={onDaySelect} selectedIndex={selectedDayIndex} />
       </CardContent>
     </Card>
   );

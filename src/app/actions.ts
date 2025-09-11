@@ -43,7 +43,7 @@ function processForecastData(forecastData: ApiForecastData): DailyWeatherData[] 
                 description: day.weather[0].description // Take description from first entry
             }]
         };
-    }).slice(0, 5); // Return forecast for the next 5 days
+    }).slice(0, 7); // Return forecast for the next 7 days
 
     return daily;
 }
