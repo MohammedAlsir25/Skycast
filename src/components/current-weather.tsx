@@ -8,8 +8,8 @@ interface CurrentWeatherProps {
 }
 
 const CurrentWeather = ({ data }: CurrentWeatherProps) => {
-  const { main, weather, sys } = data;
-  const weatherInfo = weather[0];
+  const { current } = data;
+  const weatherInfo = current.weather[0];
 
   return (
     <Card>
@@ -22,7 +22,7 @@ const CurrentWeather = ({ data }: CurrentWeatherProps) => {
             />
             <div>
               <p className="font-headline text-8xl font-bold">
-                {Math.round(main.temp)}&deg;
+                {Math.round(current.temp)}&deg;
               </p>
               <p className="text-lg capitalize text-muted-foreground">
                 {weatherInfo.description}
@@ -31,7 +31,7 @@ const CurrentWeather = ({ data }: CurrentWeatherProps) => {
           </div>
           <div className="text-center md:text-right">
             <p className="text-2xl font-semibold">
-              Feels like {Math.round(main.feels_like)}&deg;
+              Feels like {Math.round(current.feels_like)}&deg;
             </p>
             <p className="text-sm text-muted-foreground">
               The real feel temperature
@@ -40,7 +40,7 @@ const CurrentWeather = ({ data }: CurrentWeatherProps) => {
         </div>
 
         <div className="mt-8">
-            <WeatherDetails data={data} />
+            <WeatherDetails data={data.current} />
         </div>
       </CardContent>
     </Card>

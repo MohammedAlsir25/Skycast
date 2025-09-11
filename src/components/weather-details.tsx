@@ -1,8 +1,8 @@
 import { Droplets, Wind, Gauge, Sunrise, Sunset, Eye } from 'lucide-react';
-import type { WeatherData } from '@/lib/types';
+import type { CurrentWeatherData } from '@/lib/types';
 
 interface WeatherDetailsProps {
-  data: WeatherData;
+  data: CurrentWeatherData;
 }
 
 const formatTime = (timestamp: number) =>
@@ -23,15 +23,15 @@ const DetailItem = ({ icon, label, value }: { icon: React.ReactNode, label: stri
 )
 
 const WeatherDetails = ({ data }: WeatherDetailsProps) => {
-  const { main, wind, sys, visibility } = data;
+  const { humidity, wind_speed, pressure, visibility, sunrise, sunset } = data;
   return (
     <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-3 lg:grid-cols-3">
-        <DetailItem icon={<Droplets className="h-6 w-6 text-primary" />} label="Humidity" value={`${main.humidity}%`} />
-        <DetailItem icon={<Wind className="h-6 w-6 text-primary" />} label="Wind Speed" value={`${wind.speed} m/s`} />
-        <DetailItem icon={<Gauge className="h-6 w-6 text-primary" />} label="Pressure" value={`${main.pressure} hPa`} />
+        <DetailItem icon={<Droplets className="h-6 w-6 text-primary" />} label="Humidity" value={`${humidity}%`} />
+        <DetailItem icon={<Wind className="h-6 w-6 text-primary" />} label="Wind Speed" value={`${wind_speed} m/s`} />
+        <DetailItem icon={<Gauge className="h-6 w-6 text-primary" />} label="Pressure" value={`${pressure} hPa`} />
         <DetailItem icon={<Eye className="h-6 w-6 text-primary" />} label="Visibility" value={`${(visibility / 1000).toFixed(1)} km`} />
-        <DetailItem icon={<Sunrise className="h-6 w-6 text-primary" />} label="Sunrise" value={formatTime(sys.sunrise)} />
-        <DetailItem icon={<Sunset className="h-6 w-6 text-primary" />} label="Sunset" value={formatTime(sys.sunset)} />
+        <DetailItem icon={<Sunrise className="h-6 w-6 text-primary" />} label="Sunrise" value={formatTime(sunrise)} />
+        <DetailItem icon={<Sunset className="h-6 w-6 text-primary" />} label="Sunset" value={formatTime(sunset)} />
     </div>
   );
 };

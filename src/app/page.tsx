@@ -34,7 +34,7 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function Home() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -46,7 +46,7 @@ export default function Home() {
     },
   });
 
-  async function handleSearch(city: string) {
+  const handleSearch = async (city: string) => {
     setLoading(true);
     setWeather(null);
     setSuggestions([]);
@@ -100,7 +100,7 @@ export default function Home() {
                 {weather ? `${weather.name}, ${weather.sys.country}`: "Skycast"}
             </h1>
             <p className="mt-1 text-muted-foreground">
-                {weather ? new Date(weather.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Your weather, simplified."}
+                {weather ? new Date(weather.current.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Your weather, simplified."}
             </p>
         </div>
 
@@ -188,7 +188,7 @@ export default function Home() {
 
 
         <div className="relative min-h-[300px]">
-            {loading && !weather && (
+            {(loading || !weather) && (
                  <div className="absolute inset-0 flex h-full items-center justify-center">
                     <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
                 </div>

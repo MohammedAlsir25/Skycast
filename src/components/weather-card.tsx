@@ -1,5 +1,5 @@
 import type { WeatherData } from '@/lib/types';
-import CurrentWeather from './current-weather';
+import WeatherTabs from './weather-tabs';
 
 interface WeatherCardProps {
   data: WeatherData;
@@ -8,7 +8,7 @@ interface WeatherCardProps {
 const WeatherCard = ({ data }: WeatherCardProps) => {
   return (
     <div className="w-full">
-      <CurrentWeather data={data} />
+      <WeatherTabs data={data} />
     </div>
   );
 };

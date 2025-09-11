@@ -18,9 +18,9 @@ export async function getWeather(city: string): Promise<WeatherData> {
   if (geoData.length === 0) {
     throw new Error(`City "${city}" not found.`);
   }
-  const { lat, lon } = geoData[0];
+  const { lat, lon, name } = geoData[0];
 
-  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  const weatherUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&appid=${apiKey}&units=metric`;
   
   const weatherResponse = await fetch(weatherUrl);
   if (!weatherResponse.ok) {
@@ -28,5 +28,12 @@ export async function getWeather(city: string): Promise<WeatherData> {
   }
   
   const weatherData: WeatherData = await weatherResponse.json();
+  
+  // Add city name and country to the response as onecall API doesn't provide it
+  weatherData.name = name;
+  weatherData.sys = {
+    country: geoData[0].country
+  };
+
   return weatherData;
 }
