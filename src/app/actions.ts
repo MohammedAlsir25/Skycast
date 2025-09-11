@@ -53,6 +53,7 @@ export async function getWeather(city: string): Promise<WeatherData> {
         icon: `https:${data.current.condition.icon}`,
         shortForecast: data.current.condition.text,
         detailedForecast: data.current.condition.text,
+        uv: data.current.uv,
     };
 
     const dailyForecasts: DailyForecast[] = data.forecast.forecastday.map(fd => ({
@@ -82,6 +83,7 @@ export async function getWeather(city: string): Promise<WeatherData> {
                 icon: `https:${fd.day.condition.icon}`,
                 shortForecast: fd.day.condition.text,
                 detailedForecast: fd.day.condition.text,
+                uv: fd.day.uv,
             }
         ],
     }));

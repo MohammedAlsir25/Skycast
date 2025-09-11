@@ -31,6 +31,7 @@ export const WeatherPeriodSchema = z.object({
     icon: z.string(),
     shortForecast: z.string(),
     detailedForecast: z.string(),
+    uv: z.number().optional(),
 });
 
 export const DailyForecastSchema = z.object({
@@ -105,6 +106,7 @@ export interface WeatherAPIResponse {
         wind_mph: number;
         wind_dir: string;
         humidity: number;
+        uv: number;
         air_quality?: {
             'us-epa-index': number;
         }
@@ -121,6 +123,7 @@ export interface WeatherAPIResponse {
                 maxwind_mph: number;
                 avghumidity: number;
                 daily_chance_of_rain: number;
+                uv: number;
                 condition: {
                     text: string;
                     icon: string;
