@@ -80,15 +80,10 @@ const CurrentWeather = ({
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex flex-col items-center gap-4 text-center">
-                    <div className="flex flex-col items-center">
-                        <p className="text-3xl font-bold">{locationName}</p>
-                        <p className="font-headline text-8xl font-bold">
-                            {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
-                        </p>
-                        <p className="text-lg capitalize text-muted-foreground">
-                            {displayWeather.name}
-                        </p>
-                    </div>
+                    <p className="text-3xl font-bold">{locationName}</p>
+                    <p className="font-headline text-8xl font-bold">
+                        {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
+                    </p>
                     <Separator className="my-4 w-1/2" />
                     <WeatherDetails period={displayWeather} sunrise={selectedDay?.sunrise} sunset={selectedDay?.sunset} />
                 </div>
