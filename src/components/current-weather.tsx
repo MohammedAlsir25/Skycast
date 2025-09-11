@@ -79,11 +79,11 @@ const CurrentWeather = ({
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex flex-col items-center gap-4 text-center">
-                    <p className="text-3xl font-bold">{locationName}</p>
-                    <p className="font-headline text-8xl font-bold">
+                    <p className="text-3xl font-bold text-center">{locationName}</p>
+                    <p className="font-headline text-8xl font-bold text-center">
                         {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
                     </p>
-                    <div className='-mt-4 space-y-1'>
+                    <div className='-mt-4 space-y-1 text-center'>
                         <p className="text-lg font-semibold capitalize">
                             {displayWeather.shortForecast}
                         </p>
