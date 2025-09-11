@@ -35,11 +35,6 @@ const summarizeWeatherFlow = ai.defineFlow(
         End with a creative and relevant lifestyle suggestion based on the weather. For example, if it's sunny, suggest a walk in the park. If it's rainy, suggest a cozy day indoors with a movie.
                 
         Keep your response to 2-3 sentences total. Be conversational and not overly robotic.
-
-        Here is the weather data to use:
-        - Today's High: ${weatherData.daily[0].high_f}°F / ${weatherData.daily[0].high_c}°C
-        - General Forecast: ${weatherData.current.shortForecast}
-        - Chance of Rain: ${weatherData.daily[0].periods[0].probabilityOfPrecipitation.value}%
       `;
 
     const { output } = await ai.generate({
