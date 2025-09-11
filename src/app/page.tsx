@@ -18,8 +18,7 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { getWeather } from '@/app/actions';
-import type { WeatherData } from '@/lib/types';
-import { suggestLocation } from '@/ai/flows/ai-suggest-location';
+import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import WeatherCard from '@/components/weather-card';
@@ -32,10 +31,27 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
+// Helper to filter hourly data for the selected day
+const getHourlyForSelectedDay = (
+  hourly: HourlyForecast[] | undefined,
+  selectedDay: DailyForecast | undefined
+): HourlyForecast[] => {
+  if (!hourly || !selectedDay) return [];
+  // This is a simplified filter. A more robust solution would handle timezone differences.
+  // weather.gov hourly forecast starts from the current hour.
+  // We'll show the next 24 hours from the time of the query if the first day is selected.
+  // For subsequent days, this filtering logic would need to be more complex.
+  // For now, we only show the hourly forecast for the *current* day.
+  if (new Date(selectedDay.date).toDateString() === new Date().toDateString()) {
+     return hourly.slice(0, 12); // Show next 12 hours for today
+  }
+  return []; // Don't show hourly for future days as the data isn't aligned
+};
+
+
 export default function Home() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const { toast } = useToast();
@@ -49,9 +65,8 @@ export default function Home() {
 
   const handleSearch = async (city: string) => {
     setLoading(true);
-    setSuggestions([]);
     setError(null);
-    setSelectedDayIndex(0);
+    setSelectedDayIndex(0); // Reset to today on new search
     form.setValue('city', city);
     form.clearErrors();
 
@@ -61,23 +76,12 @@ export default function Home() {
     } catch (err) {
       const error = err as Error;
       setWeatherData(null);
-      if (error.message.startsWith('Missing OpenWeatherMap API Key')) {
-        setError(error.message);
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'An error occurred',
-          description: error.message || 'Failed to fetch weather data.',
-        });
-        if (error.message.toLowerCase().includes('not found')) {
-          try {
-            const aiResponse = await suggestLocation({ city });
-            setSuggestions(aiResponse.suggestions);
-          } catch (aiError) {
-            console.error('AI suggestion failed:', aiError);
-          }
-        }
-      }
+      setError(error.message || 'An unknown error occurred.');
+      toast({
+        variant: 'destructive',
+        title: 'An error occurred',
+        description: error.message || 'Failed to fetch weather data.',
+      });
     } finally {
       setLoading(false);
     }
@@ -92,24 +96,11 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const selectedDayWeather = weatherData?.daily[selectedDayIndex];
+  const selectedDay = weatherData?.daily[selectedDayIndex];
 
-  // We need to construct a `CurrentWeatherData`-like object for the selected day
-  // to pass to WeatherDetails and WeatherCard's main display
-  const displayWeather = selectedDayIndex === 0 && weatherData ? weatherData.current : selectedDayWeather ? {
-    dt: selectedDayWeather.dt,
-    sunrise: selectedDayWeather.sunrise,
-    sunset: selectedDayWeather.sunset,
-    temp: selectedDayWeather.temp.max, // Show max temp for the day
-    feels_like: selectedDayWeather.feels_like.day,
-    pressure: selectedDayWeather.pressure,
-    humidity: selectedDayWeather.humidity,
-    visibility: 10000, // Not available in daily forecast
-    wind_speed: selectedDayWeather.wind_speed,
-    wind_deg: selectedDayWeather.wind_deg,
-    weather: selectedDayWeather.weather,
-    clouds: selectedDayWeather.clouds,
-  } : null;
+  // The main display card will show the first period of the selected day.
+  const displayWeather: WeatherPeriod | null = selectedDay?.periods[0] || (selectedDayIndex === 0 ? weatherData?.current : null) || null;
+  const displayTemp = selectedDayIndex === 0 ? weatherData?.current.temperature : selectedDay?.high;
 
 
   return (
@@ -121,7 +112,7 @@ export default function Home() {
                 Skycast
             </h1>
             <p className="mt-1 text-muted-foreground">
-                Your weather, simplified.
+                Your weather, simplified. (US Only)
             </p>
         </div>
 
@@ -136,7 +127,7 @@ export default function Home() {
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Enter a city name..."
+                        placeholder="Enter a US city name..."
                         className="pl-10 text-base"
                         {...field}
                         aria-label="City Name"
@@ -165,7 +156,7 @@ export default function Home() {
         </div>
         
         <AnimatePresence>
-          {error && (
+          {error && !loading && (
              <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -173,7 +164,7 @@ export default function Home() {
             >
               <Alert variant="destructive">
                 <Terminal className="h-4 w-4" />
-                <AlertTitle>Action Required</AlertTitle>
+                <AlertTitle>Error</AlertTitle>
                 <AlertDescription>
                   {error}
                 </AlertDescription>
@@ -181,32 +172,6 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        <AnimatePresence>
-          {suggestions.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="rounded-lg border bg-card p-4"
-            >
-              <h3 className="text-sm font-medium text-muted-foreground">Did you mean:</h3>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {suggestions.map((suggestion) => (
-                  <Button
-                    key={suggestion}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSearch(suggestion)}
-                  >
-                    {suggestion}
-                  </Button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
 
         <div className="relative min-h-[550px]">
             {(loading) && (
@@ -225,8 +190,11 @@ export default function Home() {
                 className="absolute inset-0"
               >
                 <WeatherCard 
-                  data={{ ...weatherData, current: displayWeather }} 
+                  location={weatherData.location}
+                  displayWeather={displayWeather}
+                  displayTemp={displayTemp}
                   dailyData={weatherData.daily}
+                  hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
                   onDaySelect={setSelectedDayIndex}
                   selectedDayIndex={selectedDayIndex}
                 />

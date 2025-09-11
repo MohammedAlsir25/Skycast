@@ -1,10 +1,9 @@
 import WeatherIcon from '@/components/weather-icon';
-import type { DailyWeatherData } from '@/lib/types';
-import { format } from 'date-fns';
+import type { DailyForecast } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface DailyForecastProps {
-  data: DailyWeatherData[];
+  data: DailyForecast[];
   title?: string;
   onDaySelect: (index: number) => void;
   selectedIndex: number;
@@ -24,14 +23,14 @@ const DailyForecast = ({ data, title = "7-Day Forecast", onDaySelect, selectedIn
               )}
               onClick={() => onDaySelect(index)}
             >
-              <p className="font-semibold">{format(new Date(day.dt * 1000), 'eee')}</p>
+              <p className="font-semibold">{day.day}</p>
               <WeatherIcon
-                iconCode={day.weather[0].icon}
+                iconCode={day.icon}
                 className="h-10 w-10 text-primary"
               />
               <div className="text-center">
-                <p className="text-base font-bold">{Math.round(day.temp.max)}&deg;</p>
-                <p className="text-xs text-muted-foreground">{Math.round(day.temp.min)}&deg;</p>
+                <p className="text-base font-bold">{Math.round(day.high)}&deg;</p>
+                <p className="text-xs text-muted-foreground">{Math.round(day.low)}&deg;</p>
               </div>
             </div>
           ))}

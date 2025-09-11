@@ -1,35 +1,46 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
-import type { WeatherData, DailyWeatherData } from '@/lib/types';
+import type { WeatherLocation, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
 import WeatherDetails from './weather-details';
 import DailyForecast from './daily-forecast';
+import HourlyForecast from './hourly-forecast';
 import { Separator } from './ui/separator';
 
 interface WeatherCardProps {
-  data: WeatherData;
-  dailyData: DailyWeatherData[];
+  location: WeatherLocation;
+  displayWeather: WeatherPeriod;
+  displayTemp: number | undefined;
+  dailyData: DailyForecast[];
+  hourlyData: HourlyForecast[];
   onDaySelect: (index: number) => void;
   selectedDayIndex: number;
 }
 
-const WeatherCard = ({ data, dailyData, onDaySelect, selectedDayIndex }: WeatherCardProps) => {
-  const { current, name, sys } = data;
-  const weatherInfo = current.weather[0];
+const WeatherCard = ({ 
+    location, 
+    displayWeather, 
+    displayTemp,
+    dailyData, 
+    hourlyData, 
+    onDaySelect, 
+    selectedDayIndex 
+}: WeatherCardProps) => {
+  const { name, state } = location;
 
   return (
     <Card className="w-full">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                 <CardTitle className="text-3xl font-bold">{name}, {sys.country}</CardTitle>
-                 <CardDescription>{new Date(current.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</CardDescription>
+                 <CardTitle className="text-3xl font-bold">{name}{state ? `, ${state}`: ''}</CardTitle>
+                 <CardDescription>{new Date(displayWeather.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</CardDescription>
             </div>
              <div className="text-right">
                 <p className="text-lg font-semibold">
-                Feels like {Math.round(current.feels_like)}&deg;
+                  {displayWeather.shortForecast}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {selectedDayIndex === 0 ? "The real feel temperature" : "Estimated real feel"}
+                  {selectedDayIndex === 0 ? "Current conditions" : "Forecast"}
                 </p>
             </div>
         </div>
@@ -38,21 +49,23 @@ const WeatherCard = ({ data, dailyData, onDaySelect, selectedDayIndex }: Weather
         <div className="flex flex-col items-center gap-4 text-center md:flex-row md:gap-8">
            <div className="flex items-center">
             <WeatherIcon
-              iconCode={weatherInfo.icon}
+              iconCode={displayWeather.icon}
               className="h-32 w-32 text-primary"
             />
             <div>
               <p className="font-headline text-8xl font-bold">
-                {Math.round(current.temp)}&deg;
+                {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
               </p>
               <p className="text-lg capitalize text-muted-foreground">
-                {weatherInfo.description}
+                {displayWeather.name}
               </p>
             </div>
            </div>
            <Separator orientation='vertical' className="hidden md:flex h-24"/>
-           <WeatherDetails data={data.current} isToday={selectedDayIndex === 0} />
+           <WeatherDetails period={displayWeather} />
         </div>
+        <Separator/>
+        <HourlyForecast data={hourlyData} />
         <Separator/>
         <DailyForecast data={dailyData} onDaySelect={onDaySelect} selectedIndex={selectedDayIndex} />
       </CardContent>
