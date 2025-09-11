@@ -95,7 +95,13 @@ export default function Home() {
       form.setValue('city', data.location.name); // Set city name from response
       
       // Fire off AI summary and nearby cities in parallel
-      summarizeWeather(data).then(setAiSummary);
+      summarizeWeather(data)
+        .then(setAiSummary)
+        .catch(err => {
+          console.error("AI summary failed:", err);
+          setAiSummary(null); // Ensure summary is null on failure
+        });
+
       fetchNearbyCitiesWeather(data.location.country, data.location.name);
 
     } catch (err) {
