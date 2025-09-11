@@ -42,6 +42,8 @@ const MapBounds = ({ bounds }: { bounds: LatLngBoundsExpression }) => {
 
 // This self-contained component will be re-mounted by React thanks to the key prop
 const WeatherMap = ({ weatherDataList, tempUnit }: WeatherMapProps) => {
+  if (weatherDataList.length === 0) return null;
+
   const positions = weatherDataList.map(data => ({
     lat: data.location.lat,
     lng: data.location.lon,
@@ -97,7 +99,7 @@ const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps)
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow p-6 pt-2">
-           {isMounted && isOpen && weatherDataList.length > 0 && (
+           {isMounted && isOpen && (
              <WeatherMap key={mapKey} weatherDataList={weatherDataList} tempUnit={tempUnit} />
            )}
         </div>
