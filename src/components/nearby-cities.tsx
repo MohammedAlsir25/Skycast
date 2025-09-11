@@ -3,13 +3,15 @@ import type { TempUnit } from '@/app/page';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Globe, Map } from 'lucide-react';
 
 interface NearbyCitiesProps {
   weatherDataList: WeatherData[];
   loading: boolean;
   tempUnit: TempUnit;
   onCityClick: (city: string) => void;
+  onViewMapClick: () => void;
 }
 
 const NearbyCityCard = ({ weatherData, tempUnit, onClick }: { weatherData: WeatherData, tempUnit: TempUnit, onClick: () => void }) => {
@@ -34,15 +36,23 @@ const NearbyCityCard = ({ weatherData, tempUnit, onClick }: { weatherData: Weath
 };
 
 
-const NearbyCities = ({ weatherDataList, loading, tempUnit, onCityClick }: NearbyCitiesProps) => {
+const NearbyCities = ({ weatherDataList, loading, tempUnit, onCityClick, onViewMapClick }: NearbyCitiesProps) => {
   const hasCities = weatherDataList.length > 0;
 
   return (
     <div>
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Elsewhere
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Elsewhere
+            </h3>
+            {hasCities && (
+                <Button variant="ghost" size="sm" onClick={onViewMapClick}>
+                    <Map className="h-4 w-4 mr-2" />
+                    View on Map
+                </Button>
+            )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {loading && (
                 <>

@@ -5,8 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin, Moon, Sun, LocateFixed } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { Search, LoaderCircle, MapPin, LocateFixed } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,12 +16,6 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { getWeather } from '@/app/actions';
 import { summarizeWeather } from '@/ai/flows/weather-summary-flow';
@@ -34,6 +27,7 @@ import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import NearbyCities from '@/components/nearby-cities';
+import MapModal from '@/components/map-modal';
 
 const formSchema = z.object({
   city: z
@@ -52,34 +46,6 @@ const getHourlyForSelectedDay = (
   return hourly.filter(h => h.date === selectedDay.date);
 };
 
-function ThemeToggle() {
-  const { setTheme } = useTheme();
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-
 export default function Home() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [nearbyCitiesWeather, setNearbyCitiesWeather] = useState<WeatherData[]>([]);
@@ -89,6 +55,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [tempUnit, setTempUnit] = useState<TempUnit>('F');
+  const [isMapOpen, setIsMapOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
@@ -188,10 +155,18 @@ export default function Home() {
   const selectedDay = weatherData?.daily[selectedDayIndex];
 
   const displayWeather: WeatherPeriod | null = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
+  
+  const allCitiesOnMap = weatherData ? [weatherData, ...nearbyCitiesWeather] : nearbyCitiesWeather;
 
   return (
     <>
       <WeatherBackground weatherData={weatherData} />
+      <MapModal 
+        isOpen={isMapOpen} 
+        onClose={() => setIsMapOpen(false)} 
+        weatherDataList={allCitiesOnMap}
+        tempUnit={tempUnit}
+      />
       <main className="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 lg:p-8 relative z-10">
         <div className="w-full max-w-4xl space-y-6">
           <div className="flex w-full items-center justify-between">
@@ -217,7 +192,6 @@ export default function Home() {
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <ThemeToggle />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full max-w-xs">
                     <FormField
@@ -308,6 +282,7 @@ export default function Home() {
                         loading={loadingNearby}
                         tempUnit={tempUnit}
                         onCityClick={handleSearch}
+                        onViewMapClick={() => setIsMapOpen(true)}
                       />
                     }
                   />
