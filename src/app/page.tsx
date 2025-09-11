@@ -55,7 +55,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
-  const [tempUnit, setTempUnit] = useState<TempUnit>('F');
+  const [tempUnit, setTempUnit] = useState<TempUnit>('C');
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
