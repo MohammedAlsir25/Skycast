@@ -1,61 +1,70 @@
-// Types for WeatherAPI.com
-export interface WeatherLocation {
-    name: string;
-    state: string;
-    country: string;
-    lat: number;
-    lon: number;
-}
+import { z } from 'zod';
 
-export interface WeatherPeriod {
-    number: number;
-    name: string;
-    startTime: string;
-    endTime: string;
-    isDaytime: boolean;
-    temperature_f: number;
-    temperature_c: number;
-    temperatureUnit: string;
-    temperatureTrend: string | null;
-    probabilityOfPrecipitation: {
-        value: number | null;
-    };
-    relativeHumidity: {
-        value: number | null;
-    };
-    windSpeed: string;
-    windDirection: string;
-    icon: string;
-    shortForecast: string;
-    detailedForecast: string;
-}
+// Zod Schemas for validation in Genkit flow
+export const WeatherLocationSchema = z.object({
+    name: z.string(),
+    state: z.string(),
+    country: z.string(),
+    lat: z.number(),
+    lon: z.number(),
+});
 
-export interface DailyForecast {
-    date: string; // YYYY-MM-DD
-    day: string; // "Sun", "Mon", etc.
-    high_f: number;
-    low_f: number;
-    high_c: number;
-    low_c: number;
-    icon: string;
-    shortForecast: string;
-    periods: WeatherPeriod[];
-}
+export const WeatherPeriodSchema = z.object({
+    number: z.number(),
+    name: z.string(),
+    startTime: z.string(),
+    endTime: z.string(),
+    isDaytime: z.boolean(),
+    temperature_f: z.number(),
+    temperature_c: z.number(),
+    temperatureUnit: z.string(),
+    temperatureTrend: z.string().nullable(),
+    probabilityOfPrecipitation: z.object({
+        value: z.number().nullable(),
+    }),
+    relativeHumidity: z.object({
+        value: z.number().nullable(),
+    }),
+    windSpeed: z.string(),
+    windDirection: z.string(),
+    icon: z.string(),
+    shortForecast: z.string(),
+    detailedForecast: z.string(),
+});
 
-export interface HourlyForecast {
-    time: string; // "1 AM", "2 AM", etc.
-    temperature_f: number;
-    temperature_c: number;
-    icon: string;
-    date: string; // YYYY-MM-DD
-}
+export const DailyForecastSchema = z.object({
+    date: z.string(),
+    day: z.string(),
+    high_f: z.number(),
+    low_f: z.number(),
+    high_c: z.number(),
+    low_c: z.number(),
+    icon: z.string(),
+    shortForecast: z.string(),
+    periods: z.array(WeatherPeriodSchema),
+});
 
-export interface WeatherData {
-    location: WeatherLocation;
-    current: WeatherPeriod;
-    daily: DailyForecast[];
-    hourly: HourlyForecast[];
-}
+export const HourlyForecastSchema = z.object({
+    time: z.string(),
+    temperature_f: z.number(),
+    temperature_c: z.number(),
+    icon: z.string(),
+    date: z.string(),
+});
+
+export const WeatherDataSchema = z.object({
+    location: WeatherLocationSchema,
+    current: WeatherPeriodSchema,
+    daily: z.array(DailyForecastSchema),
+    hourly: z.array(HourlyForecastSchema),
+});
+
+// TypeScript Types
+export type WeatherLocation = z.infer<typeof WeatherLocationSchema>;
+export type WeatherPeriod = z.infer<typeof WeatherPeriodSchema>;
+export type DailyForecast = z.infer<typeof DailyForecastSchema>;
+export type HourlyForecast = z.infer<typeof HourlyForecastSchema>;
+export type WeatherData = z.infer<typeof WeatherDataSchema>;
 
 
 // API Response Types

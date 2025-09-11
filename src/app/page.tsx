@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { getWeather } from '@/app/actions';
+import { summarizeWeather } from '@/ai/flows/weather-summary-flow';
 import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
@@ -43,6 +44,7 @@ const getHourlyForSelectedDay = (
 
 export default function Home() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -59,6 +61,7 @@ export default function Home() {
   const handleSearch = async (city: string) => {
     setLoading(true);
     setError(null);
+    setAiSummary(null);
     setSelectedDayIndex(0); // Reset to today on new search
     form.setValue('city', city);
     form.clearErrors();
@@ -66,10 +69,15 @@ export default function Home() {
     try {
       const data = await getWeather(city);
       setWeatherData(data);
+      const summary = await summarizeWeather(data);
+      setAiSummary(summary);
     } catch (err) {
       const error = err as Error;
       setWeatherData(null);
       let errorMessage = error.message || 'An unknown error occurred.';
+      if (error.message.includes('WEATHERAPI_API_KEY')) {
+        errorMessage = 'WeatherAPI.com API key is missing. Please add it to your .env file.'
+      }
       setError(errorMessage);
       toast({
         variant: 'destructive',
@@ -185,6 +193,7 @@ export default function Home() {
                   displayWeather={displayWeather}
                   dailyData={weatherData.daily}
                   hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
+                  aiSummary={aiSummary}
                   onDaySelect={setSelectedDayIndex}
                   selectedDayIndex={selectedDayIndex}
                   tempUnit={tempUnit}
