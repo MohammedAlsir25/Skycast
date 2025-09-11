@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle } from 'lucide-react';
+import { Search, LoaderCircle, MapPin } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,12 +17,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import WeatherCard from '@/components/weather-card';
 import { getWeather } from '@/app/actions';
 import type { WeatherData } from '@/lib/types';
 import { suggestLocation } from '@/ai/flows/ai-suggest-location';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import WeatherCard from '@/components/weather-card';
 
 const formSchema = z.object({
   city: z
@@ -42,7 +42,7 @@ export default function Home() {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      city: '',
+      city: 'New York',
     },
   });
 
@@ -85,21 +85,27 @@ export default function Home() {
   const onSubmit = (data: FormSchema) => {
     handleSearch(data.city);
   };
+  
+  // Initial search on component mount
+  useState(() => {
+    handleSearch('New York');
+  });
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-center bg-background p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="font-headline text-5xl font-bold tracking-tight text-foreground sm:text-6xl">
-            Skycast
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Your weather, simplified.
-          </p>
+    <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-4xl space-y-6">
+        <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
+           <div className="text-center md:text-left">
+            <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                {weather ? `${weather.name}, ${weather.country}`: "Skycast"}
+            </h1>
+            <p className="mt-1 text-muted-foreground">
+                {weather ? new Date(weather.current.dt * 1000).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Your weather, simplified."}
+            </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="relative">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full max-w-sm">
             <FormField
               control={form.control}
               name="city"
@@ -107,7 +113,7 @@ export default function Home() {
                 <FormItem>
                   <FormControl>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                      <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         placeholder="Enter a city name..."
                         className="pl-10 text-base"
@@ -135,6 +141,7 @@ export default function Home() {
             </Button>
           </form>
         </Form>
+        </div>
         
         <AnimatePresence>
           {error && (
@@ -143,7 +150,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <Alert>
+              <Alert variant="destructive">
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Action Required</AlertTitle>
                 <AlertDescription>
@@ -180,7 +187,12 @@ export default function Home() {
         </AnimatePresence>
 
 
-        <div className="relative h-[450px]">
+        <div className="relative">
+            {loading && !weather && (
+                 <div className="flex h-96 items-center justify-center">
+                    <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
+                </div>
+            )}
           <AnimatePresence>
             {weather && (
               <motion.div
@@ -188,7 +200,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.5 }}
                 className="absolute inset-0"
               >
                 <WeatherCard data={weather} />
