@@ -59,6 +59,7 @@ const WeatherCard = ({
     const locationName = locationParts.filter(Boolean).join(', ');
 
   const displayTemp = tempUnit === 'F' ? displayWeather.temperature_f : displayWeather.temperature_c;
+  const selectedDay = dailyData[selectedDayIndex];
 
   return (
     <Card className="w-full bg-card/80 backdrop-blur-sm">
@@ -104,7 +105,7 @@ const WeatherCard = ({
             </div>
            </div>
            <Separator orientation='vertical' className="hidden md:flex h-24"/>
-           <WeatherDetails period={displayWeather} />
+           <WeatherDetails period={displayWeather} sunrise={selectedDay?.sunrise} sunset={selectedDay?.sunset} />
         </div>
         
         {aiSummary && (

@@ -1,8 +1,10 @@
-import { Droplets, Wind, Compass, Sun } from 'lucide-react';
+import { Droplets, Wind, Compass, Sun, Sunrise, Sunset } from 'lucide-react';
 import type { WeatherPeriod } from '@/lib/types';
 
 interface WeatherDetailsProps {
   period: WeatherPeriod;
+  sunrise?: string;
+  sunset?: string;
 }
 
 const getUVIndexCategory = (uvIndex: number | undefined | null): string => {
@@ -31,7 +33,7 @@ const DetailItem = ({ icon, label, value, unit, category }: { icon: React.ReactN
     )
 }
 
-const WeatherDetails = ({ period }: WeatherDetailsProps) => {
+const WeatherDetails = ({ period, sunrise, sunset }: WeatherDetailsProps) => {
   const { 
       probabilityOfPrecipitation,
       relativeHumidity,
@@ -47,6 +49,8 @@ const WeatherDetails = ({ period }: WeatherDetailsProps) => {
         <DetailItem icon={<Wind className="h-6 w-6 text-primary" />} label="Wind Speed" value={windSpeed} />
         <DetailItem icon={<Compass className="h-6 w-6 text-primary" />} label="Wind Direction" value={windDirection} />
         <DetailItem icon={<Sun className="h-6 w-6 text-primary" />} label="UV Index" value={uv} category={getUVIndexCategory(uv)} />
+        <DetailItem icon={<Sunrise className="h-6 w-6 text-primary" />} label="Sunrise" value={sunrise} />
+        <DetailItem icon={<Sunset className="h-6 w-6 text-primary" />} label="Sunset" value={sunset} />
     </div>
   );
 };

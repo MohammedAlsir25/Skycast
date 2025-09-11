@@ -44,6 +44,8 @@ export const DailyForecastSchema = z.object({
     icon: z.string(),
     shortForecast: z.string(),
     periods: z.array(WeatherPeriodSchema),
+    sunrise: z.string().optional(),
+    sunset: z.string().optional(),
 });
 
 export const HourlyForecastSchema = z.object({
@@ -140,6 +142,10 @@ export interface WeatherAPIResponse {
                     text: string;
                     icon: string;
                 };
+            };
+            astro: {
+                sunrise: string;
+                sunset: string;
             };
             hour: {
                 time_epoch: number;

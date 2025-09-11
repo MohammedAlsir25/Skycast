@@ -65,6 +65,8 @@ export async function getWeather(city: string): Promise<WeatherData> {
         low_c: fd.day.mintemp_c,
         icon: `https:${fd.day.condition.icon}`,
         shortForecast: fd.day.condition.text,
+        sunrise: fd.astro.sunrise,
+        sunset: fd.astro.sunset,
         periods: [
              {
                 number: 1,
