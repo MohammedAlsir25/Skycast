@@ -27,16 +27,18 @@ const summarizeWeatherFlow = ai.defineFlow(
   },
   async (weatherData) => {
     const prompt = `
-        You are a friendly weather forecaster.
-        Given the following weather data for ${weatherData.location.name}, provide a short, conversational summary.
-        Mention the current temperature, the high and low for the day, and the general conditions (e.g., "clear skies," "expect some rain").
-        Keep it to a maximum of 3 sentences.
+        You are a friendly and cheerful weather forecaster.
+        Your goal is to provide a short, conversational summary of the day's weather for ${weatherData.location.name}.
+        
+        Start with a friendly greeting (e.g., "Good morning from ${weatherData.location.name}!").
+        Briefly mention the general conditions (e.g., "sunny," "cloudy," "rainy") and the day's high temperature.
+        End with a creative and relevant lifestyle suggestion based on the weather. For example, if it's sunny, suggest a walk in the park. If it's rainy, suggest a cozy day indoors with a movie.
+        Keep your response to 2-3 sentences total. Be conversational and not overly robotic.
 
-        Current Temperature: ${weatherData.current.temperature_f}°F / ${weatherData.current.temperature_c}°C
-        Today's High: ${weatherData.daily[0].high_f}°F / ${weatherData.daily[0].high_c}°C
-        Today's Low: ${weatherData.daily[0].low_f}°F / ${weatherData.daily[0].low_c}°C
-        Forecast: ${weatherData.current.shortForecast}
-        Chance of Rain: ${weatherData.daily[0].periods[0].probabilityOfPrecipitation.value}%
+        Here is the weather data to use:
+        - Today's High: ${weatherData.daily[0].high_f}°F / ${weatherData.daily[0].high_c}°C
+        - General Forecast: ${weatherData.current.shortForecast}
+        - Chance of Rain: ${weatherData.daily[0].periods[0].probabilityOfPrecipitation.value}%
       `;
 
     const { output } = await ai.generate({
