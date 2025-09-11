@@ -95,7 +95,6 @@ const CurrentWeather = ({
                         )}
                     </div>
                     
-                    <Separator className="my-4 w-1/2" />
                     <WeatherDetails period={displayWeather} sunrise={selectedDay?.sunrise} sunset={selectedDay?.sunset} />
                 </div>
                 
