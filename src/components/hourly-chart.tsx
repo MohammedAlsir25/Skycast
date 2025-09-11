@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, ComposedChart } from 'recharts';
+import { Line, CartesianGrid, XAxis, YAxis, ComposedChart, Area } from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
@@ -79,6 +79,10 @@ const HourlyChart = ({
       label: config.label(tempUnit),
       color: config.color,
     },
+     value_line: { // Added for unique key
+      label: config.label(tempUnit),
+      color: config.color,
+    },
   };
   
   const yAxisWidth = dataType === 'temperature' ? 30 : 25;
@@ -120,7 +124,10 @@ const HourlyChart = ({
                 strokeDasharray: '3 3',
               }}
               content={<ChartTooltipContent 
-                formatter={(value) => config.formatter(Number(value), tempUnit)}
+                formatter={(value, name) => {
+                  if (name === 'value_line') return null; // Hide the duplicated line value in tooltip
+                  return config.formatter(Number(value), tempUnit);
+                }}
                 nameKey="value"
                 labelKey='time'
               />}
@@ -140,6 +147,7 @@ const HourlyChart = ({
             />
             <Line
               dataKey="value"
+              name="value_line" // Use unique name for the key
               type="monotone"
               stroke={config.color}
               strokeWidth={2}
