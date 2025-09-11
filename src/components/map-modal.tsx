@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Dialog,
   DialogContent,
@@ -7,6 +9,12 @@ import {
 } from '@/components/ui/dialog';
 import type { WeatherData } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import type { LatLngBoundsExpression } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import "leaflet-defaulticon-compatibility";
+
 
 interface MapModalProps {
   isOpen: boolean;
@@ -15,28 +23,27 @@ interface MapModalProps {
   tempUnit: TempUnit;
 }
 
+// Component to auto-fit the map to the markers
+const MapBounds = ({ bounds }: { bounds: LatLngBoundsExpression }) => {
+  const map = useMap();
+  map.fitBounds(bounds, { padding: [50, 50] });
+  return null;
+};
+
 const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps) => {
   if (!isOpen || weatherDataList.length === 0) {
     return null;
   }
 
-  // Calculate bounding box
-  const latitudes = weatherDataList.map(data => data.location.lat);
-  const longitudes = weatherDataList.map(data => data.location.lon);
-  const minLat = Math.min(...latitudes) - 1;
-  const maxLat = Math.max(...latitudes) + 1;
-  const minLon = Math.min(...longitudes) - 1;
-  const maxLon = Math.max(...longitudes) + 1;
+  const positions = weatherDataList.map(data => ({
+    lat: data.location.lat,
+    lng: data.location.lon,
+    name: data.location.name,
+    temp: Math.round(tempUnit === 'F' ? data.current.temperature_f : data.current.temperature_c),
+  }));
 
-  const bbox = [minLon, minLat, maxLon, maxLat].join(',');
-
-  const markers = weatherDataList.map(data => {
-    const temp = Math.round(tempUnit === 'F' ? data.current.temperature_f : data.current.temperature_c);
-    const label = `${data.location.name}: ${temp}°`;
-    return `marker=${data.location.lat},${data.location.lon};${encodeURIComponent(label)}`;
-  }).join('&');
-
-  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&${markers}`;
+  const bounds: LatLngBoundsExpression = positions.map(p => [p.lat, p.lng]);
+  const hasMultiplePoints = positions.length > 1;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -48,14 +55,25 @@ const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps)
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow p-6 pt-2">
-            <iframe
-            width="100%"
-            height="100%"
-            frameBorder="0"
-            scrolling="no"
-            src={mapUrl}
-            className='rounded-md border'
-            ></iframe>
+            <MapContainer
+                center={[positions[0].lat, positions[0].lng]}
+                zoom={hasMultiplePoints ? undefined : 10}
+                scrollWheelZoom={true}
+                className='h-full w-full rounded-md border'
+            >
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {positions.map((pos) => (
+                    <Marker key={pos.name} position={[pos.lat, pos.lng]}>
+                        <Popup>
+                           <b>{pos.name}</b>: {pos.temp}°{tempUnit}
+                        </Popup>
+                    </Marker>
+                ))}
+                {hasMultiplePoints && <MapBounds bounds={bounds} />}
+            </MapContainer>
         </div>
       </DialogContent>
     </Dialog>
