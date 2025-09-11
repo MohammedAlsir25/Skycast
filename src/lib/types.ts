@@ -28,9 +28,6 @@ export interface WeatherPeriod {
     unitCode: string;
     value: number;
   };
-  humidity: { // Manually added for easier access if needed
-    value: number;
-  };
   windSpeed: string;
   windDirection: string;
   icon: string;
