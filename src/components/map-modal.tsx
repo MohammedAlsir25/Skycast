@@ -23,17 +23,21 @@ const getMapUrl = (weatherDataList: WeatherData[], tempUnit: TempUnit) => {
     }
 
     const primaryLocation = weatherDataList[0];
-    const { lat, lon } = primaryLocation.location;
+    const { lat, lon, name } = primaryLocation.location;
+    const temp = tempUnit === 'F' ? primaryLocation.current.temperature_f : primaryLocation.current.temperature_c;
+    const tempString = `${Math.round(temp)}°${tempUnit}`;
 
-    const markers = weatherDataList.map(data => {
-        const temp = tempUnit === 'F' ? data.current.temperature_f : data.current.temperature_c;
-        const label = `${data.location.name} (${Math.round(temp)}°${tempUnit})`;
-        return `marker=${data.location.lat},${data.location.lon},${encodeURIComponent(label)}`;
-    }).join('&');
-
-    const zoom = weatherDataList.length > 1 ? 6 : 10;
+    // Apple Maps URL parameters are more limited for embeds.
+    // We can center the map and place a pin for the primary location.
+    // It does not support multiple markers in the same way OpenStreetMap does.
+    const q = `${name} (${tempString})`;
+    const center = `${lat},${lon}`;
     
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${lon-2},${lat-2},${lon+2},${lat+2}&layer=mapnik&marker=${lat},${lon}&${markers}`;
+    // Set a reasonable span for the map view.
+    // The values are in degrees of latitude and longitude.
+    const span = weatherDataList.length > 1 ? '5.0,5.0' : '1.0,1.0';
+    
+    return `https://maps.apple.com/maps?q=${encodeURIComponent(q)}&ll=${center}&spn=${span}&t=m&z=10`;
 };
 
 
@@ -48,7 +52,7 @@ const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps)
         <DialogHeader className='p-6 pb-0'>
           <DialogTitle>Weather Map</DialogTitle>
           <DialogDescription>
-            Current temperatures for the selected and nearby cities.
+            Map view showing the currently selected location.
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow p-6 pt-2">
@@ -57,6 +61,7 @@ const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps)
               height="100%"
               className='border rounded-md'
               src={mapUrl}
+              allow="geo"
            >
            </iframe>
         </div>
