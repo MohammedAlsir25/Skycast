@@ -28,15 +28,12 @@ const CurrentWeather = ({
     onTempUnitChange
 }: CurrentWeatherProps) => {
 
-    const { name, state, country } = location;
+    const { name, state } = location;
     const displayDate = new Date(displayWeather.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     const locationParts = [name];
     if (state && state !== name) {
         locationParts.push(state);
-    }
-    if (country && country !== name) {
-        locationParts.push(country);
     }
     const locationName = locationParts.filter(Boolean).join(', ');
 
@@ -47,7 +44,6 @@ const CurrentWeather = ({
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle className="text-3xl font-bold">{locationName}</CardTitle>
                         <CardDescription>{displayDate}</CardDescription>
                     </div>
                     <div className="text-right">
@@ -91,6 +87,7 @@ const CurrentWeather = ({
                         className="h-32 w-32"
                         />
                         <div>
+                        <p className="text-3xl font-bold">{locationName}</p>
                         <p className="font-headline text-8xl font-bold">
                             {displayTemp ? Math.round(displayTemp) : 'N/A'}&deg;
                         </p>
