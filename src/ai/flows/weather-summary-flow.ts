@@ -37,13 +37,17 @@ const summarizeWeatherFlow = ai.defineFlow(
         Keep your response to 2-3 sentences total. Be conversational and not overly robotic.
       `;
 
-    const { output } = await ai.generate({
-      prompt: prompt,
-      output: {
-        schema: WeatherSummarySchema
-      },
-    });
-
-    return output!;
+    try {
+      const { output } = await ai.generate({
+        prompt: prompt,
+        output: {
+          schema: WeatherSummarySchema
+        },
+      });
+      return output!;
+    } catch (error) {
+        console.error("AI weather summary failed:", error);
+        return { summary: "" };
+    }
   }
 );
