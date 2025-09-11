@@ -79,7 +79,7 @@ const HourlyChart = ({
       label: config.label(tempUnit),
       color: config.color,
     },
-     value_line: { // Added for unique key
+     value_line: {
       label: config.label(tempUnit),
       color: config.color,
     },
@@ -125,7 +125,7 @@ const HourlyChart = ({
               }}
               content={<ChartTooltipContent 
                 formatter={(value, name) => {
-                  if (name === 'value_line') return null; // Hide the duplicated line value in tooltip
+                  if (name === 'value_line') return null;
                   return config.formatter(Number(value), tempUnit);
                 }}
                 nameKey="value"
@@ -147,7 +147,7 @@ const HourlyChart = ({
             />
             <Line
               dataKey="value"
-              name="value_line" // Use unique name for the key
+              name="value_line"
               type="monotone"
               stroke={config.color}
               strokeWidth={2}
