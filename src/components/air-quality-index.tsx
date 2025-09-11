@@ -19,7 +19,6 @@ const AirQualityIndex = ({ data }: AirQualityIndexProps) => {
   }
 
   // The EPA index is 1-6. We'll map it to a 0-100 scale for the gauge.
-  // We'll treat the 6 levels as segments of the gauge.
   const maxIndex = 6;
   const percentage = ((usEpaIndex - 1) / (maxIndex - 1)) * 100;
 
@@ -29,15 +28,12 @@ const AirQualityIndex = ({ data }: AirQualityIndexProps) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <div className='cursor-help'>
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-bold flex items-center gap-2">
                         <Wind className="h-5 w-5" />
                         Air Quality Index
                     </h3>
                     <span className={cn("font-bold text-lg", color)}>{label}</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2.5">
-                    <div className="h-2.5 rounded-full" style={{ width: `${percentage}%`, backgroundColor: `hsl(var(--${color.replace('text-', '')}))` }}></div>
                 </div>
                  <div className="relative mb-4">
                     <div className="absolute w-full top-0">
@@ -56,6 +52,9 @@ const AirQualityIndex = ({ data }: AirQualityIndexProps) => {
                     </div>
                     <div className="w-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 rounded-full h-2.5"></div>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                    {description}
+                </p>
             </div>
           </TooltipTrigger>
           <TooltipContent>
