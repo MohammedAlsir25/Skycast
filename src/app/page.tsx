@@ -40,18 +40,29 @@ export type TempUnit = 'F' | 'C';
 
 const getHourlyForSelectedDay = (
   hourly: HourlyForecast[] | undefined,
-  selectedDay: DailyForecast | undefined
+  selectedDay: DailyForecast | undefined,
+  selectedDayIndex: number
 ): HourlyForecast[] => {
   if (!hourly || !selectedDay) return [];
   // Show all hourly data if it's the current day (index 0)
-  if (hourly.some(h => new Date(h.date).toDateString() === new Date().toDateString())) {
+  if (selectedDayIndex === 0) {
     const today = new Date();
     const currentHour = today.getHours();
     // Filter to show from the current hour onwards for today
     return hourly.filter(h => {
         const hourDate = new Date(h.date);
         if (hourDate.toDateString() !== today.toDateString()) return true;
-        const forecastHour = parseInt(h.time.split(':')[0], 10) + (h.time.includes('PM') && parseInt(h.time.split(':')[0], 10) !== 12 ? 12 : 0);
+        
+        const timeParts = h.time.split(/:| /); // Split by colon or space
+        let forecastHour = parseInt(timeParts[0], 10);
+        const period = timeParts[2];
+        
+        if (period === 'PM' && forecastHour !== 12) {
+            forecastHour += 12;
+        } else if (period === 'AM' && forecastHour === 12) {
+            forecastHour = 0;
+        }
+
         return hourDate.toDateString() === today.toDateString() && forecastHour >= currentHour;
     });
   }
@@ -82,7 +93,7 @@ export default function Home() {
     setNearbyCitiesWeather([]);
     try {
       const nearby = await findNearbyCities({ country, currentCity });
-      const weatherPromises = nearby.cities.slice(0, 5).map(city => getWeather(city)); // Limit to 5 cities
+      const weatherPromises = nearby.cities.slice(0, 4).map(city => getWeather(city)); // Limit to 4 cities
       const results = await Promise.all(weatherPromises);
       setNearbyCitiesWeather(results);
     } catch (err) {
@@ -187,8 +198,8 @@ export default function Home() {
       <WeatherBackground weatherData={weatherData} />
       <main className="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 lg:p-8 relative z-10">
         <div className="w-full max-w-4xl space-y-6">
-          <div className="flex w-full items-center justify-between">
-            <div className='flex items-center gap-2'>
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className='flex items-center gap-2 flex-shrink-0'>
               <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                   Skycast
               </h1>
@@ -196,7 +207,7 @@ export default function Home() {
                   Your weather, simplified.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-grow justify-end">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -235,7 +246,7 @@ export default function Home() {
                     <Button
                         type="submit"
                         size="icon"
-                        className="absolute right-1 top-1 h-8 w-8"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
                         disabled={loading}
                         aria-label="Search"
                     >
@@ -269,19 +280,19 @@ export default function Home() {
           </AnimatePresence>
 
           <div className="relative min-h-[550px]">
-              {(loading) && (
-                  <div className="absolute inset-0 flex h-full items-center justify-center">
+              {loading && (
+                  <div className="absolute inset-0 flex h-full items-center justify-center bg-background/30 backdrop-blur-sm rounded-lg z-20">
                       <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
                   </div>
               )}
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {weatherData && displayWeather && !loading && (
                 <motion.div
-                  key={selectedDayIndex}
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                  transition={{ duration: 0.3 }}
+                  key={weatherData.location.name + selectedDayIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
                   className="space-y-6"
                 >
                   <CurrentWeather
@@ -296,7 +307,7 @@ export default function Home() {
 
                   <InfoTabs 
                     dailyData={weatherData.daily}
-                    hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
+                    hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay, selectedDayIndex)}
                     airQuality={weatherData.airQuality}
                     alerts={weatherData.alerts}
                     nearbyCities={nearbyCitiesWeather}
@@ -316,3 +327,5 @@ export default function Home() {
     </>
   );
 }
+
+    
