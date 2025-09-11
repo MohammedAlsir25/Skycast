@@ -57,24 +57,23 @@ export default function Home() {
     try {
       const weatherData = await getWeather(city);
       setWeather(weatherData);
-    } catch (error) {
-      const err = error as Error;
-      if (err.message.startsWith('Missing OpenWeatherMap API Key')) {
-        setError(err.message);
+    } catch (err) {
+      const error = err as Error;
+      if (error.message.startsWith('Missing OpenWeatherMap API Key')) {
+        setError(error.message);
       } else {
         toast({
           variant: 'destructive',
           title: 'An error occurred',
-          description: err.message || 'Failed to fetch weather data.',
+          description: error.message || 'Failed to fetch weather data.',
         });
-      }
-      
-      if (err.message.toLowerCase().includes('not found')) {
-        try {
-          const aiResponse = await suggestLocation({ city });
-          setSuggestions(aiResponse.suggestions);
-        } catch (aiError) {
-          console.error('AI suggestion failed:', aiError);
+        if (error.message.toLowerCase().includes('not found')) {
+          try {
+            const aiResponse = await suggestLocation({ city });
+            setSuggestions(aiResponse.suggestions);
+          } catch (aiError) {
+            console.error('AI suggestion failed:', aiError);
+          }
         }
       }
     } finally {
