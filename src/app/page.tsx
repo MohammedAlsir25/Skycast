@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin } from 'lucide-react';
+import { Search, LoaderCircle, MapPin, Compass } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,11 +68,15 @@ export default function Home() {
     } catch (err) {
       const error = err as Error;
       setWeatherData(null);
-      setError(error.message || 'An unknown error occurred.');
+      let errorMessage = error.message || 'An unknown error occurred.';
+      if (error.message.includes('404')) {
+        errorMessage = `Could not find weather data for "${city}". The API might not cover this area.`;
+      }
+      setError(errorMessage);
       toast({
         variant: 'destructive',
         title: 'An error occurred',
-        description: error.message || 'Failed to fetch weather data.',
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -90,9 +94,8 @@ export default function Home() {
 
   const selectedDay = weatherData?.daily[selectedDayIndex];
 
-  // The main display card will show the first period of the selected day.
   const displayWeather: WeatherPeriod | null = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
-  const displayTemp = selectedDayIndex === 0 ? weatherData?.current.temperature : selectedDay?.high;
+  const displayTemp = displayWeather?.temperature;
 
 
   return (
@@ -119,7 +122,7 @@ export default function Home() {
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                       <Input
-                        placeholder="Enter a city name..."
+                        placeholder="Enter a city name (US only)..."
                         className="pl-10 text-base"
                         {...field}
                         aria-label="City Name"

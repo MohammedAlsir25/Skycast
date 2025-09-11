@@ -1,136 +1,119 @@
 'use server';
 
-import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, OpenWeatherOneCallResponse } from '@/lib/types';
-
-// Helper to check for the API key and throw a clear error if it's missing.
-function getApiKey(): string {
-  const apiKey = process.env.OPENWEATHERMAP_API_KEY;
-  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
-    throw new Error('OpenWeatherMap API key is missing. Please add it to your .env file.');
-  }
-  return apiKey;
-}
+import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, WeatherGovPeriodsResponse, WeatherGovGridResponse, WeatherGovPointResponse } from '@/lib/types';
 
 // Helper to get city and state from displayName
-function getLocationFromName(displayName: string): { name: string; country: string } {
+function getLocationFromName(displayName: string): { name: string; state: string } {
     const parts = displayName.split(', ');
     if (parts.length >= 2) {
-        return { name: parts[0], country: parts[parts.length - 1] };
+        return { name: parts[0], state: parts[1] };
     }
-    return { name: displayName, country: '' };
+    return { name: displayName, state: '' };
 }
 
-// Converts Unix timestamp to a formatted time string
-const formatTime = (timestamp: number, timeZone: string): string => {
-  return new Date(timestamp * 1000).toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    hour12: true,
-    timeZone,
-  });
-};
+async function getCoordinates(city: string): Promise<{ lat: number; lon: number, name: string, state: string }> {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&countrycodes=us`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'Skycast Weather App' } });
 
-// Converts Unix timestamp to a short day string (e.g., "Mon")
-const formatDay = (timestamp: number, timeZone: string): string => {
-  return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-    weekday: 'short',
-    timeZone,
-  });
-};
+    if (!response.ok) {
+        throw new Error('Failed to fetch location data from Nominatim.');
+    }
 
+    const data = await response.json();
+    if (data.length === 0) {
+        throw new Error(`City "${city}" not found.`);
+    }
+
+    const { lat, lon, display_name } = data[0];
+    const { name, state } = getLocationFromName(display_name);
+
+    return { lat: parseFloat(lat), lon: parseFloat(lon), name, state };
+}
+
+async function getGridEndpoints(lat: number, lon: number): Promise<WeatherGovGridResponse> {
+    const url = `https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'Skycast Weather App' } });
+
+    if (!response.ok) {
+        if (response.status === 404) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Could not find a weather station for the provided coordinates.');
+        }
+        throw new Error('Failed to fetch grid endpoints from weather.gov API.');
+    }
+
+    const data: WeatherGovPointResponse = await response.json();
+    return data.properties;
+}
 
 export async function getWeather(city: string): Promise<WeatherData> {
-  const apiKey = getApiKey();
+    const { lat, lon, name, state } = await getCoordinates(city);
+    const gridEndpoints = await getGridEndpoints(lat, lon);
+    const forecastUrl = gridEndpoints.forecast;
+    const forecastHourlyUrl = gridEndpoints.forecastHourly;
 
-  // Step 1: Geocode city name to get lat/lon.
-  const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${apiKey}`;
-  const geoResponse = await fetch(geoUrl);
+    const [forecastResponse, hourlyResponse] = await Promise.all([
+        fetch(forecastUrl, { headers: { 'User-Agent': 'Skycast Weather App' } }),
+        fetch(forecastHourlyUrl, { headers: { 'User-Agent': 'Skycast Weather App' } })
+    ]);
 
-  if (!geoResponse.ok) {
-    throw new Error('Failed to fetch location data from OpenWeatherMap.');
-  }
+    if (!forecastResponse.ok) {
+        throw new Error('Failed to fetch daily forecast data from weather.gov.');
+    }
+    if (!hourlyResponse.ok) {
+        throw new Error('Failed to fetch hourly forecast data from weather.gov.');
+    }
 
-  const geoData = await geoResponse.json();
-  if (geoData.length === 0) {
-    throw new Error(`City "${city}" not found.`);
-  }
+    const forecastData: WeatherGovPeriodsResponse = await forecastResponse.json();
+    const hourlyData: WeatherGovPeriodsResponse = await hourlyResponse.json();
 
-  const { lat, lon, name, country } = geoData[0];
-  
-  // Step 2: Get weather data using the One Call API.
-  const oneCallUrl = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&appid=${apiKey}&units=imperial`;
-  const weatherResponse = await fetch(oneCallUrl);
+    const { periods } = forecastData.properties;
+    const { periods: hourlyPeriods } = hourlyData.properties;
+    
+    if (!periods || periods.length === 0) {
+        throw new Error("No forecast data available.");
+    }
 
-  if (!weatherResponse.ok) {
-    throw new Error('Failed to fetch weather data from OneCall API.');
-  }
+    const currentConditions = periods[0];
+    const dailyForecasts: DailyForecast[] = [];
+    const processedDays = new Set<string>();
 
-  const data: OpenWeatherOneCallResponse = await weatherResponse.json();
+    for (const period of periods) {
+        const date = new Date(period.startTime).toLocaleDateString('en-US', { timeZone: gridEndpoints.timeZone });
+        if (processedDays.has(date)) continue;
 
-  // Step 3: Process and combine the data into our app's format.
-  const currentConditions: WeatherPeriod = {
-    startTime: new Date(data.current.dt * 1000).toISOString(),
-    name: "Current",
-    temperature: data.current.temp,
-    temperatureUnit: 'F',
-    windSpeed: `${Math.round(data.current.wind_speed)} mph`,
-    windDirection: '', // Not always available in current
-    icon: `https://openweathermap.org/img/wn/${data.current.weather[0].icon}@4x.png`,
-    shortForecast: data.current.weather[0].main,
-    detailedForecast: data.current.weather[0].description,
-    humidity: data.current.humidity,
-    pressure: data.current.pressure,
-    visibility: data.current.visibility / 1000, // convert to km
-    sunrise: formatTime(data.current.sunrise, data.timezone),
-    sunset: formatTime(data.current.sunset, data.timezone),
-    feels_like: data.current.feels_like,
-    isDaytime: true,
-  };
+        const dayPeriods = periods.filter(p => new Date(p.startTime).toLocaleDateString('en-US', { timeZone: gridEndpoints.timeZone }) === date);
+        const dayPeriod = dayPeriods.find(p => p.isDaytime) || dayPeriods[0];
+        const nightPeriod = dayPeriods.find(p => !p.isDaytime);
 
-  const dailyForecasts: DailyForecast[] = data.daily.slice(0, 7).map(day => ({
-      date: new Date(day.dt * 1000).toISOString(),
-      day: formatDay(day.dt, data.timezone),
-      high: day.temp.max,
-      low: day.temp.min,
-      dayTemp: day.temp.day,
-      nightTemp: day.temp.night,
-      icon: `https://openweathermap.org/img/wn/${day.weather[0].icon}@4x.png`,
-      shortForecast: day.weather[0].main,
-      longForecast: day.summary,
-      periods: [{
-          startTime: new Date(day.dt * 1000).toISOString(),
-          name: new Date(day.dt * 1000).toLocaleDateString('en-US', { weekday: 'long' }),
-          temperature: day.temp.day,
-          temperatureUnit: 'F',
-          windSpeed: `${Math.round(day.wind_speed)} mph`,
-          windDirection: '',
-          icon: `https://openweathermap.org/img/wn/${day.weather[0].icon}@4x.png`,
-          shortForecast: day.weather[0].main,
-          detailedForecast: day.summary,
-          humidity: day.humidity,
-          pressure: day.pressure,
-          sunrise: formatTime(day.sunrise, data.timezone),
-          sunset: formatTime(day.sunset, data.timezone),
-          feels_like: day.feels_like.day,
-          isDaytime: true,
-      }],
-  }));
+        dailyForecasts.push({
+            date: new Date(dayPeriod.startTime).toISOString(),
+            day: new Date(dayPeriod.startTime).toLocaleDateString('en-US', { weekday: 'short', timeZone: gridEndpoints.timeZone }),
+            high: dayPeriod.temperature,
+            low: nightPeriod?.temperature ?? dayPeriod.temperature,
+            icon: dayPeriod.icon,
+            shortForecast: dayPeriod.shortForecast,
+            periods: dayPeriods,
+        });
+        processedDays.add(date);
+    }
 
-  const hourlyForecasts: HourlyForecast[] = data.hourly.map(hour => ({
-    time: formatTime(hour.dt, data.timezone),
-    temperature: hour.temp,
-    icon: `https://openweathermap.org/img/wn/${hour.weather[0].icon}@2x.png`,
-    date: new Date(hour.dt * 1000).toISOString().split('T')[0],
-  }));
+    const hourlyForecasts: HourlyForecast[] = hourlyPeriods.map(period => ({
+        time: new Date(period.startTime).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: gridEndpoints.timeZone }),
+        temperature: period.temperature,
+        icon: period.icon,
+        date: new Date(period.startTime).toISOString().split('T')[0],
+    }));
 
-  return {
-    location: {
-      name: name,
-      state: country, // Using state field for country
-      lat: lat,
-      lon: lon,
-    },
-    current: currentConditions,
-    daily: dailyForecasts,
-    hourly: hourlyForecasts,
-  };
+    return {
+        location: {
+            name: name,
+            state: state,
+            lat,
+            lon,
+        },
+        current: currentConditions,
+        daily: dailyForecasts.slice(0, 7),
+        hourly: hourlyForecasts,
+    };
 }

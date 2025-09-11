@@ -1,4 +1,4 @@
-import { Droplets, Wind, Sunrise, Sunset, Eye, Gauge, Thermometer } from 'lucide-react';
+import { Droplets, Wind, Compass } from 'lucide-react';
 import type { WeatherPeriod } from '@/lib/types';
 
 interface WeatherDetailsProps {
@@ -21,24 +21,18 @@ const DetailItem = ({ icon, label, value, unit }: { icon: React.ReactNode, label
 
 const WeatherDetails = ({ period }: WeatherDetailsProps) => {
   const { 
-      humidity,
+      probabilityOfPrecipitation,
+      relativeHumidity,
       windSpeed,
-      sunrise,
-      sunset,
-      pressure,
-      visibility,
-      feels_like,
+      windDirection
     } = period;
   
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
-        <DetailItem icon={<Droplets className="h-6 w-6 text-primary" />} label="Humidity" value={humidity} unit="%"/>
+        <DetailItem icon={<Droplets className="h-6 w-6 text-primary" />} label="Precipitation" value={probabilityOfPrecipitation?.value ?? 0} unit="%"/>
+        <DetailItem icon={<Droplets className="h-6 w-6 text-primary" />} label="Humidity" value={relativeHumidity?.value} unit="%"/>
         <DetailItem icon={<Wind className="h-6 w-6 text-primary" />} label="Wind Speed" value={windSpeed} />
-        <DetailItem icon={<Sunrise className="h-6 w-6 text-primary" />} label="Sunrise" value={sunrise} />
-        <DetailItem icon={<Sunset className="h-6 w-6 text-primary" />} label="Sunset" value={sunset} />
-        <DetailItem icon={<Thermometer className="h-6 w-6 text-primary" />} label="Feels Like" value={feels_like ? Math.round(feels_like) : null} unit="°"/>
-        <DetailItem icon={<Eye className="h-6 w-6 text-primary" />} label="Visibility" value={visibility} unit=" km"/>
-        <DetailItem icon={<Gauge className="h-6 w-6 text-primary" />} label="Pressure" value={pressure} unit=" hPa"/>
+        <DetailItem icon={<Compass className="h-6 w-6 text-primary" />} label="Wind Direction" value={windDirection} />
     </div>
   );
 };
