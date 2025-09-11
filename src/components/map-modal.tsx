@@ -3,44 +3,10 @@
 import { useEffect, useMemo } from 'react';
 import type { WeatherData } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import type { LatLngBoundsExpression } from 'leaflet';
 import L from 'leaflet';
-
-interface MapModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  weatherDataList: WeatherData[];
-  tempUnit: TempUnit;
-}
-
-const createCustomIcon = (temp: number, unit: TempUnit) => {
-  const html = `
-    <div style="background-color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 2px solid #3b82f6; font-weight: bold; font-size: 14px;">
-      ${Math.round(temp)}°
-    </div>
-  `;
-  return L.divIcon({
-    html: html,
-    className: 'custom-leaflet-icon',
-    iconSize: [40, 40],
-    iconAnchor: [20, 40],
-    popupAnchor: [0, -40]
-  });
-};
-
-const RecenterAutomatically = ({ bounds }: { bounds: LatLngBoundsExpression | null }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (bounds) {
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }, [bounds, map]);
-  return null;
-};
 
 // This is a separate component to ensure it gets a new `key` and is fully re-mounted
 const WeatherMap = ({ weatherDataList, tempUnit }: { weatherDataList: WeatherData[], tempUnit: TempUnit }) => {
@@ -84,6 +50,38 @@ const WeatherMap = ({ weatherDataList, tempUnit }: { weatherDataList: WeatherDat
   );
 }
 
+
+const createCustomIcon = (temp: number, unit: TempUnit) => {
+  const html = `
+    <div style="background-color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; border: 2px solid #3b82f6; font-weight: bold; font-size: 14px;">
+      ${Math.round(temp)}°
+    </div>
+  `;
+  return L.divIcon({
+    html: html,
+    className: 'custom-leaflet-icon',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40]
+  });
+};
+
+const RecenterAutomatically = ({ bounds }: { bounds: LatLngBoundsExpression | null }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [bounds, map]);
+  return null;
+};
+
+interface MapModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  weatherDataList: WeatherData[];
+  tempUnit: TempUnit;
+}
 
 const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps) => {
 
