@@ -23,6 +23,7 @@ import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod } from '
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import WeatherCard from '@/components/weather-card';
+import WeatherBackground from '@/components/weather-background';
 
 const formSchema = z.object({
   city: z
@@ -103,107 +104,110 @@ export default function Home() {
   const displayWeather: WeatherPeriod | null = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
 
   return (
-    <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-4xl space-y-6">
-        <div className="flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
-           <div>
-            <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Skycast
-            </h1>
-            <p className="mt-1 text-muted-foreground">
-                Your weather, simplified.
-            </p>
-        </div>
+    <>
+      <WeatherBackground weather={weatherData?.current} />
+      <main className="flex min-h-screen w-full flex-col items-center p-4 sm:p-6 lg:p-8 relative z-10">
+        <div className="w-full max-w-4xl space-y-6">
+          <div className="flex flex-col items-center gap-4 text-center md:flex-row md:justify-between md:text-left">
+            <div>
+              <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  Skycast
+              </h1>
+              <p className="mt-1 text-muted-foreground">
+                  Your weather, simplified.
+              </p>
+          </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full max-w-sm">
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        placeholder="Enter a city name..."
-                        className="pl-10 text-base"
-                        {...field}
-                        aria-label="City Name"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2"
-              disabled={loading}
-              aria-label="Search"
-            >
-              {loading ? (
-                <LoaderCircle className="h-5 w-5 animate-spin" />
-              ) : (
-                <Search className="h-5 w-5" />
-              )}
-            </Button>
-          </form>
-        </Form>
-        </div>
-        
-        <AnimatePresence>
-          {error && !loading && (
-             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
-              <Alert variant="destructive">
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>
-                  {error}
-                </AlertDescription>
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="relative min-h-[550px]">
-            {(loading) && (
-                 <div className="absolute inset-0 flex h-full items-center justify-center">
-                    <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
-                </div>
-            )}
-          <AnimatePresence>
-            {weatherData && displayWeather && !loading && (
-              <motion.div
-                key={selectedDayIndex}
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full max-w-sm">
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          placeholder="Enter a city name..."
+                          className="pl-10 text-base bg-card/80 backdrop-blur-sm"
+                          {...field}
+                          aria-label="City Name"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2"
+                disabled={loading}
+                aria-label="Search"
               >
-                <WeatherCard 
-                  location={weatherData.location}
-                  displayWeather={displayWeather}
-                  dailyData={weatherData.daily}
-                  hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
-                  aiSummary={aiSummary}
-                  onDaySelect={setSelectedDayIndex}
-                  selectedDayIndex={selectedDayIndex}
-                  tempUnit={tempUnit}
-                  onTempUnitChange={setTempUnit}
-                />
+                {loading ? (
+                  <LoaderCircle className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Search className="h-5 w-5" />
+                )}
+              </Button>
+            </form>
+          </Form>
+          </div>
+          
+          <AnimatePresence>
+            {error && !loading && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <Alert variant="destructive">
+                  <Terminal className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>
+                    {error}
+                  </AlertDescription>
+                </Alert>
               </motion.div>
             )}
           </AnimatePresence>
+
+          <div className="relative min-h-[550px]">
+              {(loading) && (
+                  <div className="absolute inset-0 flex h-full items-center justify-center">
+                      <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
+                  </div>
+              )}
+            <AnimatePresence>
+              {weatherData && displayWeather && !loading && (
+                <motion.div
+                  key={selectedDayIndex}
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0"
+                >
+                  <WeatherCard 
+                    location={weatherData.location}
+                    displayWeather={displayWeather}
+                    dailyData={weatherData.daily}
+                    hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
+                    aiSummary={aiSummary}
+                    onDaySelect={setSelectedDayIndex}
+                    selectedDayIndex={selectedDayIndex}
+                    tempUnit={tempUnit}
+                    onTempUnitChange={setTempUnit}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

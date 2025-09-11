@@ -42,7 +42,7 @@ const WeatherCard = ({
   const displayTemp = tempUnit === 'F' ? displayWeather.temperature_f : displayWeather.temperature_c;
 
   return (
-    <Card className="w-full">
+    <Card className="w-full bg-card/80 backdrop-blur-sm">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
