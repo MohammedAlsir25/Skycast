@@ -137,16 +137,18 @@ export default function Home() {
           toast({
             variant: 'destructive',
             title: 'Geolocation Error',
-            description: 'Could not get your location. Please ensure you have granted permission.',
+            description: 'Could not get your location. Defaulting to New York.',
           });
+          handleSearch('New York'); // Fallback to default
         }
       );
     } else {
        toast({
         variant: 'destructive',
         title: 'Geolocation Error',
-        description: 'Geolocation is not supported by your browser.',
+        description: 'Geolocation is not supported by your browser. Defaulting to New York.',
       });
+      handleSearch('New York'); // Fallback to default
     }
   };
 
@@ -155,7 +157,7 @@ export default function Home() {
   };
   
   useEffect(() => {
-    handleSearch('New York');
+    handleGeolocation();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
