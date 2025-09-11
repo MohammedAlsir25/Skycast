@@ -81,11 +81,6 @@ const CurrentWeather = ({
             <CardContent className="space-y-6">
                 <div className="flex flex-col items-center gap-4 text-center md:flex-row md:gap-8">
                     <div className="flex items-center">
-                        <WeatherIcon
-                        iconCode={displayWeather.icon}
-                        shortForecast={displayWeather.shortForecast}
-                        className="h-32 w-32"
-                        />
                         <div>
                         <p className="text-3xl font-bold">{locationName}</p>
                         <p className="font-headline text-8xl font-bold">
