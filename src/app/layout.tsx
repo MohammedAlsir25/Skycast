@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './weather-backgrounds.css';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 

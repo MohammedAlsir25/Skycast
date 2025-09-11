@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin, LocateFixed } from 'lucide-react';
+import { Search, LoaderCircle, MapPin, LocateFixed, Map } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +28,10 @@ import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import NearbyCities from '@/components/nearby-cities';
-import { getMapUrl } from '@/components/map-modal';
+
+const MapModal = dynamic(() => import('@/components/map-modal'), {
+  ssr: false,
+});
 
 
 const formSchema = z.object({
@@ -56,6 +60,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [tempUnit, setTempUnit] = useState<TempUnit>('F');
+  const [isMapOpen, setIsMapOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormSchema>({
@@ -94,12 +99,12 @@ export default function Home() {
       setWeatherData(data);
       form.setValue('city', data.location.name); // Set city name from response
       
-      // Fire off AI summary and nearby cities in parallel
       summarizeWeather(data)
         .then(setAiSummary)
         .catch(err => {
           console.error("AI summary failed:", err);
-          setAiSummary(null); // Ensure summary is null on failure
+          // Don't show an error to the user, just gracefully degrade.
+          setAiSummary(null);
         });
 
       fetchNearbyCitiesWeather(data.location.country, data.location.name);
@@ -282,10 +287,7 @@ export default function Home() {
                         loading={loadingNearby}
                         tempUnit={tempUnit}
                         onCityClick={handleSearch}
-                        onViewMapClick={() => {
-                            const mapUrl = getMapUrl(allCitiesOnMap, tempUnit);
-                            window.open(mapUrl, '_blank');
-                        }}
+                        onViewMapClick={() => setIsMapOpen(true)}
                       />
                     }
                   />
@@ -295,6 +297,12 @@ export default function Home() {
           </div>
         </div>
       </main>
+      <MapModal
+        isOpen={isMapOpen}
+        onClose={() => setIsMapOpen(false)}
+        weatherDataList={allCitiesOnMap}
+        tempUnit={tempUnit}
+      />
     </>
   );
 }
