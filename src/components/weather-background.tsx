@@ -35,7 +35,7 @@ const getWeatherBackgroundClass = (weatherData: WeatherData | null | undefined):
 const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weatherData }) => {
   const [backgroundClass, setBackgroundClass] = useState('bg-default');
   const [previousClass, setPreviousClass] = useState('');
-  const [transform, setTransform] = useState('rotate(0deg) translateY(-50vh) rotate(0deg)');
+  const [transform, setTransform] = useState('rotate(0deg) translateY(-25vh) rotate(0deg)');
   const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weatherData }) =>
         const percentage = elapsedMinutes / totalMinutesInCycle;
         // Arc from -90deg (left) to 90deg (right) over the top
         const degrees = -90 + (percentage * 180);
-        setTransform(`rotate(${degrees}deg) translateY(-50vh) rotate(-${degrees}deg)`);
+        setTransform(`rotate(${degrees}deg) translateY(-25vh) rotate(-${degrees}deg)`);
         setOpacity(1);
       } else {
         setOpacity(0);
@@ -93,7 +93,7 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weatherData }) =>
           const percentage = elapsedMinutes / totalMinutesInCycle;
           // Arc from -90deg (left) to 90deg (right) over the top
           const degrees = -90 + (percentage * 180);
-          setTransform(`rotate(${degrees}deg) translateY(-50vh) rotate(-${degrees}deg)`);
+          setTransform(`rotate(${degrees}deg) translateY(-25vh) rotate(-${degrees}deg)`);
           setOpacity(1);
       } else {
           setOpacity(0);

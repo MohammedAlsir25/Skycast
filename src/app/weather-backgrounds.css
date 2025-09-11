@@ -23,7 +23,7 @@
 /* Celestial Body (Sun/Moon) */
 .celestial-body {
     position: absolute;
-    top: -50%;
+    top: 50%;
     left: 50%;
     width: 100px;
     height: 100px;
