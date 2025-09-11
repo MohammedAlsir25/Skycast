@@ -136,6 +136,7 @@ export async function getWeather(city: string): Promise<WeatherData> {
     current: {
         ...currentConditions,
         temperature: currentConditions.temperature,
+        humidity: { value: currentConditions.relativeHumidity.value } // Manually map humidity
     },
     daily: dailyForecasts,
     hourly: hourlyForecasts,
