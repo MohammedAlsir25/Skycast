@@ -33,6 +33,9 @@ const summarizeWeatherFlow = ai.defineFlow(
         Start with a friendly greeting (e.g., "Good morning from ${weatherData.location.name}!").
         Briefly mention the general conditions (e.g., "sunny," "cloudy," "rainy") and the day's high temperature.
         End with a creative and relevant lifestyle suggestion based on the weather. For example, if it's sunny, suggest a walk in the park. If it's rainy, suggest a cozy day indoors with a movie.
+        
+        IMPORTANT: Instead of ending with a period or exclamation mark, end the entire summary with a single, relevant emoji. For example: ☀️ for a sunny day, 🌧️ for a rainy day, or  parka for a cold day.
+        
         Keep your response to 2-3 sentences total. Be conversational and not overly robotic.
 
         Here is the weather data to use:
