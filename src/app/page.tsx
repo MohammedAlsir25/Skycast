@@ -99,13 +99,14 @@ export default function Home() {
       setWeatherData(data);
       form.setValue('city', data.location.name); // Set city name from response
       
-      summarizeWeather(data)
-        .then(setAiSummary)
-        .catch(err => {
-          console.error("AI summary failed:", err);
-          // Don't show an error to the user, just gracefully degrade.
-          setAiSummary(null);
-        });
+      try {
+        const summary = await summarizeWeather(data);
+        setAiSummary(summary);
+      } catch (err) {
+        console.error("AI summary failed:", err);
+        // Don't show an error to the user, just gracefully degrade.
+        setAiSummary(null);
+      }
 
       fetchNearbyCitiesWeather(data.location.country, data.location.name);
 
