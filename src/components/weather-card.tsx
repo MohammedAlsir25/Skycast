@@ -4,7 +4,7 @@ import type { WeatherLocation, DailyForecast, HourlyForecast, WeatherPeriod } fr
 import type { TempUnit } from '@/app/page';
 import WeatherDetails from './weather-details';
 import DailyForecast from './daily-forecast';
-import HourlyForecast from './hourly-forecast';
+import HourlyChart from './hourly-chart';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
@@ -96,7 +96,7 @@ const WeatherCard = ({
             </div>
         )}
         <Separator/>
-        <HourlyForecast data={hourlyData} tempUnit={tempUnit} />
+        <HourlyChart data={hourlyData} tempUnit={tempUnit} />
         <Separator/>
         <DailyForecast data={dailyData} onDaySelect={onDaySelect} selectedIndex={selectedDayIndex} tempUnit={tempUnit}/>
       </CardContent>
