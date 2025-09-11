@@ -27,6 +27,8 @@
     left: 50%;
     width: 100px;
     height: 100px;
+    margin-left: -50px; /* half of width */
+    margin-top: -50px;  /* half of height */
     border-radius: 50%;
     transform-origin: center center;
     will-change: transform, opacity;

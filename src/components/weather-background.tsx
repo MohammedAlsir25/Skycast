@@ -34,7 +34,7 @@ const getWeatherBackgroundClass = (weather: WeatherPeriod | null | undefined): s
 const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
   const [backgroundClass, setBackgroundClass] = useState('bg-default');
   const [previousClass, setPreviousClass] = useState('');
-  const [transform, setTransform] = useState('rotate(0deg) translateX(45vw) rotate(0deg)');
+  const [transform, setTransform] = useState('rotate(180deg) translateX(45vw) rotate(-180deg)');
   const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
@@ -50,40 +50,44 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weather }) => {
     const hours = now.getHours();
     const minutes = now.getMinutes();
 
-    let startHour = 6;
-    let endHour = 18;
-
+    let startHour, endHour;
+    
     if (weather?.isDaytime) {
-        if (hours >= startHour && hours < endHour) {
-            const totalMinutesInCycle = (endHour - startHour) * 60;
-            const elapsedMinutes = (hours - startHour) * 60 + minutes;
-            const percentage = elapsedMinutes / totalMinutesInCycle;
-            // Map percentage (0 to 1) to an angle from 15 to 345 degrees
-            const degrees = 15 + percentage * 330;
-            setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
-            setOpacity(1);
-        } else {
-            setOpacity(0);
-        }
-    } else {
-        let currentHour = hours;
-        // Handle nighttime wrapping past midnight
-        if (currentHour < startHour) {
-            currentHour += 24;
-            startHour += 24;
-            endHour += 24;
-        }
+      startHour = 6; // 6 AM
+      endHour = 18; // 6 PM
+      
+      if (hours >= startHour && hours < endHour) {
+        const totalMinutesInCycle = (endHour - startHour) * 60;
+        const elapsedMinutes = (hours - startHour) * 60 + minutes;
+        const percentage = elapsedMinutes / totalMinutesInCycle;
+        // Arc from 180deg (left) to 360deg (right) over the top
+        const degrees = 180 + (percentage * 180);
+        setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
+        setOpacity(1);
+      } else {
+        setOpacity(0);
+      }
+    } else { // Night time
+      startHour = 18; // 6 PM
+      endHour = 6; // 6 AM (next day)
 
-        if (currentHour >= 18 && currentHour < 30) { // 6 PM to 6 AM (next day)
-             const totalMinutesInCycle = (30 - 18) * 60;
-             const elapsedMinutes = (currentHour - 18) * 60 + minutes;
-             const percentage = elapsedMinutes / totalMinutesInCycle;
-             const degrees = 15 + percentage * 330;
-             setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
-             setOpacity(1);
-        } else {
-            setOpacity(0);
-        }
+      let currentHour = hours;
+      // Handle hours past midnight
+      if (currentHour < startHour) {
+          currentHour += 24;
+      }
+
+      if (currentHour >= startHour && currentHour < startHour + 12) {
+          const totalMinutesInCycle = 12 * 60;
+          const elapsedMinutes = (currentHour - startHour) * 60 + minutes;
+          const percentage = elapsedMinutes / totalMinutesInCycle;
+          // Arc from 180deg (left) to 360deg (right) over the top
+          const degrees = 180 + (percentage * 180);
+          setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
+          setOpacity(1);
+      } else {
+          setOpacity(0);
+      }
     }
   }, [weather]);
 
