@@ -8,9 +8,8 @@ import HourlyChart from './hourly-chart';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Sparkles, LineChart, Droplets, Wind } from 'lucide-react';
+import { Droplets, Wind, Thermometer } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Thermometer } from 'lucide-react';
 
 
 interface WeatherCardProps {
@@ -99,8 +98,7 @@ const WeatherCard = ({
         {aiSummary && (
             <div className="rounded-lg border bg-accent/50 p-4 text-sm text-accent-foreground">
                 <div className="mb-2 flex items-center gap-2 font-semibold">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    AI Summary
+                    Summary
                 </div>
                 {aiSummary}
             </div>
