@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin, LocateFixed } from 'lucide-react';
+import { Search, LoaderCircle, MapPin, LocateFixed, Calendar, Clock, Wind, Globe, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,7 +27,13 @@ import { Terminal } from 'lucide-react';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import CurrentWeather from '@/components/current-weather';
-import InfoTabs from '@/components/info-tabs';
+import DailyForecastComponent from '@/components/daily-forecast';
+import HourlyChart from '@/components/hourly-chart';
+import AirQualityIndex from '@/components/air-quality-index';
+import NearbyCities from '@/components/nearby-cities';
+import WeatherAlerts from '@/components/weather-alerts';
+import { Section } from '@/components/section';
+
 
 const formSchema = z.object({
   city: z
@@ -192,6 +198,7 @@ export default function Home() {
 
   const selectedDay = weatherData?.daily[selectedDayIndex];
   const displayWeather = selectedDayIndex === 0 ? weatherData?.current : (selectedDay?.periods[0] || null);
+  const hourlyData = getHourlyForSelectedDay(weatherData?.hourly, selectedDay, selectedDayIndex);
   
   return (
     <>
@@ -305,18 +312,44 @@ export default function Home() {
                     onTempUnitChange={setTempUnit}
                   />
 
-                  <InfoTabs 
-                    dailyData={weatherData.daily}
-                    hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay, selectedDayIndex)}
-                    airQuality={weatherData.airQuality}
-                    alerts={weatherData.alerts}
-                    nearbyCities={nearbyCitiesWeather}
-                    loadingNearby={loadingNearby}
-                    onDaySelect={setSelectedDayIndex}
-                    selectedDayIndex={selectedDayIndex}
-                    tempUnit={tempUnit}
-                    onCityClick={handleSearch}
-                  />
+                  <Section icon={<Calendar className="h-5 w-5" />} title="7-Day Forecast">
+                    <DailyForecastComponent
+                      data={weatherData.daily}
+                      onDaySelect={setSelectedDayIndex}
+                      selectedIndex={selectedDayIndex}
+                      tempUnit={tempUnit}
+                    />
+                  </Section>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Section icon={<Clock className="h-5 w-5" />} title="Hourly Forecast">
+                      <HourlyChart data={hourlyData} tempUnit={tempUnit} />
+                    </Section>
+                    <Section icon={<Wind className="h-5 w-5" />} title="Air Quality">
+                       {weatherData.airQuality ? (
+                        <AirQualityIndex data={weatherData.airQuality} />
+                      ) : (
+                        <div className="text-center text-muted-foreground p-4">
+                          Air Quality data not available.
+                        </div>
+                      )}
+                    </Section>
+                  </div>
+
+                  {weatherData.alerts && weatherData.alerts.length > 0 && (
+                    <Section icon={<AlertTriangle className="h-5 w-5" />} title="Active Alerts">
+                      <WeatherAlerts alerts={weatherData.alerts} />
+                    </Section>
+                  )}
+
+                  <Section icon={<Globe className="h-5 w-5" />} title="Elsewhere">
+                    <NearbyCities
+                      weatherDataList={nearbyCitiesWeather}
+                      loading={loadingNearby}
+                      tempUnit={tempUnit}
+                      onCityClick={handleSearch}
+                    />
+                  </Section>
 
                 </motion.div>
               )}
@@ -327,5 +360,3 @@ export default function Home() {
     </>
   );
 }
-
-    

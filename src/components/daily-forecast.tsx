@@ -2,6 +2,8 @@ import WeatherIcon from '@/components/weather-icon';
 import type { DailyForecast } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
 import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
+
 
 interface DailyForecastProps {
   data: DailyForecast[];
@@ -17,24 +19,27 @@ const DailyForecastComponent = ({ data, onDaySelect, selectedIndex, tempUnit }: 
         const high = tempUnit === 'F' ? day.high_f : day.high_c;
         const low = tempUnit === 'F' ? day.low_f : day.low_c;
         return (
-          <div 
+          <button
             key={index} 
             className={cn(
-              "flex flex-col items-center space-y-2 p-3 rounded-lg border transition-colors cursor-pointer",
-              selectedIndex === index ? "bg-accent ring-2 ring-primary" : "bg-card hover:bg-accent"
+              "flex flex-col items-center space-y-2 p-3 rounded-lg border text-sm transition-colors w-full",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              selectedIndex === index ? "bg-accent ring-2 ring-primary" : "bg-card hover:bg-accent/80"
             )}
             onClick={() => onDaySelect(index)}
+            aria-label={`Select forecast for ${day.day}`}
           >
             <p className="font-semibold">{day.day}</p>
             <WeatherIcon
               iconCode={day.icon}
+              shortForecast={day.shortForecast}
               className="h-16 w-16"
             />
             <div className="text-center">
-              <p className="text-base font-bold">{Math.round(high)}&deg;</p>
+              <p className="font-bold">{Math.round(high)}&deg;</p>
               <p className="text-xs text-muted-foreground">{Math.round(low)}&deg;</p>
             </div>
-          </div>
+          </button>
         )
       })}
     </div>
