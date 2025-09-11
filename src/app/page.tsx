@@ -281,6 +281,7 @@ export default function Home() {
                     aiSummary={aiSummary}
                     clothingRecommendation={clothingRecommendation}
                     airQuality={weatherData.airQuality}
+                    alerts={weatherData.alerts}
                     onDaySelect={setSelectedDayIndex}
                     selectedDayIndex={selectedDayIndex}
                     tempUnit={tempUnit}

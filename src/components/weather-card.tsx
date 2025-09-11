@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import WeatherIcon from '@/components/weather-icon';
-import type { WeatherLocation, DailyForecast, HourlyForecast, WeatherPeriod, AirQuality } from '@/lib/types';
+import type { WeatherLocation, DailyForecast, HourlyForecast, WeatherPeriod, AirQuality, WeatherAlert } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
 import WeatherDetails from './weather-details';
 import DailyForecast from './daily-forecast';
@@ -11,6 +11,7 @@ import { Label } from './ui/label';
 import { Droplets, Wind, Thermometer, Shirt } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AirQualityIndex from './air-quality-index';
+import WeatherAlerts from './weather-alerts';
 
 
 interface WeatherCardProps {
@@ -21,6 +22,7 @@ interface WeatherCardProps {
   aiSummary: string | null;
   clothingRecommendation: string | null;
   airQuality: AirQuality | null | undefined;
+  alerts: WeatherAlert[] | undefined;
   onDaySelect: (index: number) => void;
   selectedDayIndex: number;
   tempUnit: TempUnit;
@@ -36,6 +38,7 @@ const WeatherCard = ({
     aiSummary,
     clothingRecommendation,
     airQuality,
+    alerts,
     onDaySelect, 
     selectedDayIndex,
     tempUnit,
@@ -83,6 +86,7 @@ const WeatherCard = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        <WeatherAlerts alerts={alerts} />
         <div className="flex flex-col items-center gap-4 text-center md:flex-row md:gap-8">
            <div className="flex items-center">
             <WeatherIcon

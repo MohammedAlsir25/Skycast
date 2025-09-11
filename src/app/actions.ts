@@ -1,6 +1,6 @@
 'use server';
 
-import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, WeatherAPIResponse, AirQuality } from '@/lib/types';
+import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod, WeatherAPIResponse, AirQuality, WeatherAlert } from '@/lib/types';
 
 const API_KEY = process.env.WEATHERAPI_API_KEY;
 
@@ -22,7 +22,7 @@ export async function getWeather(city: string): Promise<WeatherData> {
         throw new Error("WeatherAPI.com API key is missing. Please add WEATHERAPI_API_KEY to your .env file.");
     }
     
-    const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=7&aqi=yes&alerts=no`;
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=7&aqi=yes&alerts=yes`;
     
     const response = await fetch(url, { headers: { 'User-Agent': 'Skycast Weather App' } });
 
@@ -109,6 +109,15 @@ export async function getWeather(city: string): Promise<WeatherData> {
         ...aqiInfo,
     };
 
+    const alerts: WeatherAlert[] = data.alerts?.alert?.map(a => ({
+        headline: a.headline,
+        event: a.event,
+        effective: a.effective,
+        expires: a.expires,
+        desc: a.desc,
+        instruction: a.instruction,
+    })) || [];
+
     return {
         location: {
             name: data.location.name,
@@ -122,5 +131,6 @@ export async function getWeather(city: string): Promise<WeatherData> {
         daily: dailyForecasts,
         hourly: hourlyForecasts,
         airQuality: airQuality,
+        alerts: alerts,
     };
 }

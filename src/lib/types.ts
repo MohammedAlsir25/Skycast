@@ -31,7 +31,7 @@ export const WeatherPeriodSchema = z.object({
     icon: z.string(),
     shortForecast: z.string(),
     detailedForecast: z.string(),
-    uv: z.number().optional(),
+    uv: z.number().optional().nullable(),
 });
 
 export const DailyForecastSchema = z.object({
@@ -55,6 +55,7 @@ export const HourlyForecastSchema = z.object({
     wind_mph: z.number(),
     icon: z.string(),
     date: z.string(),
+    is_day: z.boolean(),
 });
 
 export const AirQualitySchema = z.object({
@@ -64,6 +65,15 @@ export const AirQualitySchema = z.object({
     color: z.string(),
 });
 
+export const WeatherAlertSchema = z.object({
+    headline: z.string(),
+    event: z.string(),
+    effective: z.string(),
+    expires: z.string(),
+    desc: z.string(),
+    instruction: z.string(),
+});
+
 
 export const WeatherDataSchema = z.object({
     location: WeatherLocationSchema,
@@ -71,6 +81,7 @@ export const WeatherDataSchema = z.object({
     daily: z.array(DailyForecastSchema),
     hourly: z.array(HourlyForecastSchema),
     airQuality: AirQualitySchema.optional(),
+    alerts: z.array(WeatherAlertSchema).optional(),
 });
 
 // TypeScript Types
@@ -79,6 +90,7 @@ export type WeatherPeriod = z.infer<typeof WeatherPeriodSchema>;
 export type DailyForecast = z.infer<typeof DailyForecastSchema>;
 export type HourlyForecast = z.infer<typeof HourlyForecastSchema>;
 export type AirQuality = z.infer<typeof AirQualitySchema>;
+export type WeatherAlert = z.infer<typeof WeatherAlertSchema>;
 export type WeatherData = z.infer<typeof WeatherDataSchema>;
 
 
@@ -145,4 +157,21 @@ export interface WeatherAPIResponse {
             }[];
         }[];
     };
+    alerts?: {
+        alert: {
+            headline: string;
+            msgtype: string;
+            severity: string;
+            urgency: string;
+            areas: string;
+            category: string;
+            certainty: string;
+            event: string;
+            note: string;
+            effective: string;
+            expires: string;
+            desc: string;
+            instruction: string;
+        }[];
+    }
 }
