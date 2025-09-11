@@ -14,6 +14,7 @@ import type { LatLngBoundsExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
 import "leaflet-defaulticon-compatibility";
+import { useEffect, useState } from 'react';
 
 
 interface MapModalProps {
@@ -31,7 +32,13 @@ const MapBounds = ({ bounds }: { bounds: LatLngBoundsExpression }) => {
 };
 
 const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps) => {
-  if (!isOpen || weatherDataList.length === 0) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted || !isOpen || weatherDataList.length === 0) {
     return null;
   }
 
