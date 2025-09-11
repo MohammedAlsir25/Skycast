@@ -8,7 +8,7 @@ import HourlyChart from './hourly-chart';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Droplets, Wind, Thermometer, Shirt, Bot } from 'lucide-react';
+import { Droplets, Wind, Thermometer, Shirt } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AirQualityIndex from './air-quality-index';
 import WeatherAlerts from './weather-alerts';
@@ -110,7 +110,6 @@ const WeatherCard = ({
         
         {aiSummary && (
             <div className="flex items-start gap-4 rounded-lg border bg-accent/50 p-4 text-sm text-accent-foreground">
-                <Bot className="h-6 w-6 shrink-0 mt-0.5" />
                 <p className='leading-relaxed'>{aiSummary}</p>
             </div>
         )}
