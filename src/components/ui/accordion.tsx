@@ -34,7 +34,7 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+      {/* Default icon is removed from here to allow custom placement in weather-alerts */}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
