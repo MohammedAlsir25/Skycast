@@ -34,7 +34,7 @@ type FormSchema = z.infer<typeof formSchema>;
 
 export default function Home() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -188,9 +188,9 @@ export default function Home() {
         </AnimatePresence>
 
 
-        <div className="relative">
+        <div className="relative min-h-[480px]">
             {loading && !weather && (
-                 <div className="flex h-96 items-center justify-center">
+                 <div className="absolute inset-0 flex h-full items-center justify-center">
                     <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
                 </div>
             )}
