@@ -39,13 +39,18 @@ const nearbyCitiesFlow = ai.defineFlow(
       Return only the list of city names.
     `;
 
-    const { output } = await ai.generate({
-      prompt: prompt,
-      output: {
-        schema: NearbyCitiesOutputSchema
-      },
-    });
-
-    return output!;
+    try {
+      const { output } = await ai.generate({
+        prompt: prompt,
+        output: {
+          schema: NearbyCitiesOutputSchema
+        },
+      });
+      return output!;
+    } catch (error) {
+      console.error("AI nearby cities lookup failed:", error);
+      // If the AI call fails, return an empty list.
+      return { cities: [] };
+    }
   }
 );
