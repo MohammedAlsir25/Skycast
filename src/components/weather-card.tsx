@@ -40,7 +40,14 @@ const WeatherCard = ({
 
   const displayDate = new Date(displayWeather.startTime).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  const locationName = [name, state, country].filter(Boolean).join(', ');
+  const locationParts = [name];
+    if (state && state !== name) {
+        locationParts.push(state);
+    }
+    if (country && country !== name) {
+        locationParts.push(country);
+    }
+    const locationName = locationParts.filter(Boolean).join(', ');
 
   const displayTemp = tempUnit === 'F' ? displayWeather.temperature_f : displayWeather.temperature_c;
 
