@@ -26,12 +26,14 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getWeather } from '@/app/actions';
 import { summarizeWeather } from '@/ai/flows/weather-summary-flow';
+import { findNearbyCities } from '@/ai/flows/nearby-cities-flow';
 import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import NearbyCities from '@/components/nearby-cities';
 
 const formSchema = z.object({
   city: z
@@ -80,6 +82,8 @@ function ThemeToggle() {
 
 export default function Home() {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [nearbyCitiesWeather, setNearbyCitiesWeather] = useState<WeatherData[]>([]);
+  const [loadingNearby, setLoadingNearby] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,11 +97,28 @@ export default function Home() {
       city: 'New York',
     },
   });
+  
+  const fetchNearbyCitiesWeather = async (country: string, currentCity: string) => {
+    setLoadingNearby(true);
+    setNearbyCitiesWeather([]);
+    try {
+      const nearby = await findNearbyCities({ country, currentCity });
+      const weatherPromises = nearby.cities.slice(0, 5).map(city => getWeather(city)); // Limit to 5 cities
+      const results = await Promise.all(weatherPromises);
+      setNearbyCitiesWeather(results);
+    } catch (err) {
+      console.error("Failed to fetch nearby cities' weather:", err);
+      // Don't show a toast for this, it's a background process
+    } finally {
+      setLoadingNearby(false);
+    }
+  };
 
   const handleSearch = async (city: string) => {
     setLoading(true);
     setError(null);
     setAiSummary(null);
+    setNearbyCitiesWeather([]);
     setSelectedDayIndex(0); // Reset to today on new search
     form.clearErrors();
 
@@ -105,8 +126,11 @@ export default function Home() {
       const data = await getWeather(city);
       setWeatherData(data);
       form.setValue('city', data.location.name); // Set city name from response
-      const summary = await summarizeWeather(data);
-      setAiSummary(summary);
+      
+      // Fire off AI summary and nearby cities in parallel
+      summarizeWeather(data).then(setAiSummary);
+      fetchNearbyCitiesWeather(data.location.country, data.location.name);
+
     } catch (err) {
       const error = err as Error;
       setWeatherData(null);
@@ -278,6 +302,14 @@ export default function Home() {
                     selectedDayIndex={selectedDayIndex}
                     tempUnit={tempUnit}
                     onTempUnitChange={setTempUnit}
+                    nearbyCities={
+                      <NearbyCities 
+                        weatherDataList={nearbyCitiesWeather} 
+                        loading={loadingNearby}
+                        tempUnit={tempUnit}
+                        onCityClick={handleSearch}
+                      />
+                    }
                   />
                 </motion.div>
               )}

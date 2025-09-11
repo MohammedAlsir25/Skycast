@@ -22,6 +22,7 @@ interface WeatherCardProps {
   selectedDayIndex: number;
   tempUnit: TempUnit;
   onTempUnitChange: (unit: TempUnit) => void;
+  nearbyCities: React.ReactNode;
 }
 
 const WeatherCard = ({ 
@@ -33,7 +34,8 @@ const WeatherCard = ({
     onDaySelect, 
     selectedDayIndex,
     tempUnit,
-    onTempUnitChange
+    onTempUnitChange,
+    nearbyCities
 }: WeatherCardProps) => {
   const { name, state, country } = location;
 
@@ -126,6 +128,8 @@ const WeatherCard = ({
         </div>
         <Separator/>
         <DailyForecast data={dailyData} onDaySelect={onDaySelect} selectedIndex={selectedDayIndex} tempUnit={tempUnit}/>
+        <Separator/>
+        {nearbyCities}
       </CardContent>
     </Card>
   );
