@@ -2,7 +2,7 @@
 
 import type { WeatherData } from '@/lib/types';
 
-// Function to generate pseudo-random weather data based on city name
+// This function is kept for fallback purposes but will not be used if the API key is present.
 function generateMockWeatherData(city: string): WeatherData {
   // Simple hash function to create some variability based on the city name
   let hash = 0;
@@ -61,8 +61,10 @@ function generateMockWeatherData(city: string): WeatherData {
 export async function getWeather(city: string): Promise<WeatherData> {
   const apiKey = process.env.OPENWEATHERMAP_API_KEY;
 
-  if (!apiKey) {
-    throw new Error('Missing OpenWeatherMap API Key. Please add it to your .env file to fetch real weather data. You can get a free key from https://openweathermap.org/price.');
+  // If no API key is available, use the mock data function.
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+      console.log('No API key found, using mock weather data.');
+      return generateMockWeatherData(city);
   }
 
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
