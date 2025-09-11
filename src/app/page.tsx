@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin, Moon, Sun } from 'lucide-react';
+import { Search, LoaderCircle, MapPin, Moon, Sun, LocateFixed } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
 import WeatherCard from '@/components/weather-card';
 import WeatherBackground from '@/components/weather-background';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const formSchema = z.object({
   city: z
@@ -123,6 +124,31 @@ export default function Home() {
       setLoading(false);
     }
   };
+  
+  const handleGeolocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+          handleSearch(`${latitude},${longitude}`);
+          form.setValue('city', 'Current Location');
+        },
+        () => {
+          toast({
+            variant: 'destructive',
+            title: 'Geolocation Error',
+            description: 'Could not get your location. Please ensure you have granted permission.',
+          });
+        }
+      );
+    } else {
+       toast({
+        variant: 'destructive',
+        title: 'Geolocation Error',
+        description: 'Geolocation is not supported by your browser.',
+      });
+    }
+  };
 
   const onSubmit = (data: FormSchema) => {
     handleSearch(data.city);
@@ -152,6 +178,19 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                       <Button variant="ghost" size="icon" onClick={handleGeolocation}>
+                          <LocateFixed className="h-[1.2rem] w-[1.2rem]" />
+                          <span className="sr-only">Get Current Location</span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Use my location</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
                 <ThemeToggle />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="relative w-full max-w-xs">
@@ -178,7 +217,7 @@ export default function Home() {
                     <Button
                         type="submit"
                         size="icon"
-                        className="absolute right-1 top-1/2 -translate-y-1/2"
+                        className="absolute right-1 top-1 h-8 w-8"
                         disabled={loading}
                         aria-label="Search"
                     >
@@ -247,3 +286,5 @@ export default function Home() {
     </>
   );
 }
+
+    
