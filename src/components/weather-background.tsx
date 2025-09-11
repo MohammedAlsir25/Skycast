@@ -35,7 +35,7 @@ const getWeatherBackgroundClass = (weatherData: WeatherData | null | undefined):
 const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weatherData }) => {
   const [backgroundClass, setBackgroundClass] = useState('bg-default');
   const [previousClass, setPreviousClass] = useState('');
-  const [transform, setTransform] = useState('rotate(180deg) translateX(45vw) rotate(-180deg)');
+  const [transform, setTransform] = useState('rotate(0deg) translateY(-50vh) rotate(0deg)');
   const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
@@ -67,9 +67,9 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weatherData }) =>
         const totalMinutesInCycle = (endHour - startHour) * 60;
         const elapsedMinutes = (hours - startHour) * 60 + minutes;
         const percentage = elapsedMinutes / totalMinutesInCycle;
-        // Arc from 180deg (left) to 360deg (right) over the top
-        const degrees = 180 + (percentage * 180);
-        setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
+        // Arc from -90deg (left) to 90deg (right) over the top
+        const degrees = -90 + (percentage * 180);
+        setTransform(`rotate(${degrees}deg) translateY(-50vh) rotate(-${degrees}deg)`);
         setOpacity(1);
       } else {
         setOpacity(0);
@@ -91,9 +91,9 @@ const WeatherBackground: React.FC<WeatherBackgroundProps> = ({ weatherData }) =>
           const totalMinutesInCycle = 12 * 60;
           const elapsedMinutes = (currentHour - effectiveStartHour) * 60 + minutes;
           const percentage = elapsedMinutes / totalMinutesInCycle;
-          // Arc from 180deg (left) to 360deg (right) over the top
-          const degrees = 180 + (percentage * 180);
-          setTransform(`rotate(${degrees}deg) translateX(45vw) rotate(-${degrees}deg)`);
+          // Arc from -90deg (left) to 90deg (right) over the top
+          const degrees = -90 + (percentage * 180);
+          setTransform(`rotate(${degrees}deg) translateY(-50vh) rotate(-${degrees}deg)`);
           setOpacity(1);
       } else {
           setOpacity(0);
