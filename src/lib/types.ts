@@ -49,6 +49,9 @@ export const HourlyForecastSchema = z.object({
     time: z.string(),
     temperature_f: z.number(),
     temperature_c: z.number(),
+    precip_chance: z.number(),
+    humidity: z.number(),
+    wind_mph: z.number(),
     icon: z.string(),
     date: z.string(),
 });
@@ -120,6 +123,9 @@ export interface WeatherAPIResponse {
                     text: string;
                     icon: string;
                 };
+                chance_of_rain: number;
+                humidity: number;
+                wind_mph: number;
             }[];
         }[];
     };

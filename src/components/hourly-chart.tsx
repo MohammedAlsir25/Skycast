@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Area, ComposedChart } from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
@@ -10,44 +10,88 @@ import {
 import type { HourlyForecast } from '@/lib/types';
 import type { TempUnit } from '@/app/page';
 
+type ChartDataType = 'temperature' | 'precip' | 'humidity' | 'wind';
+
 interface HourlyChartProps {
   data: HourlyForecast[];
-  title?: string;
+  dataType: ChartDataType;
   tempUnit: TempUnit;
 }
 
+const chartConfigs = {
+  temperature: {
+    label: (unit: TempUnit) => `Temp (°${unit})`,
+    color: 'hsl(var(--chart-1))',
+    formatter: (value: number, unit: TempUnit) => `${Math.round(value)}°${unit}`,
+  },
+  precip: {
+    label: () => 'Precip. (%)',
+    color: 'hsl(var(--chart-2))',
+    formatter: (value: number) => `${value}%`,
+  },
+  humidity: {
+    label: () => 'Humidity (%)',
+    color: 'hsl(var(--chart-3))',
+    formatter: (value: number) => `${value}%`,
+  },
+  wind: {
+    label: () => 'Wind (mph)',
+    color: 'hsl(var(--chart-4))',
+    formatter: (value: number) => `${Math.round(value)} mph`,
+  },
+};
+
 const HourlyChart = ({
   data,
-  title = 'Hourly Forecast',
+  dataType,
   tempUnit,
 }: HourlyChartProps) => {
   if (!data || data.length === 0) return null;
+  const config = chartConfigs[dataType];
 
-  const chartData = React.useMemo(() => data.map(hour => ({
-    time: hour.time.replace(' ', ''), // Compact time for display
-    temperature: Math.round(
-      tempUnit === 'F' ? hour.temperature_f : hour.temperature_c
-    ),
-  })), [data, tempUnit]);
+  const chartData = React.useMemo(() => data.map(hour => {
+    let value;
+    switch(dataType) {
+        case 'temperature':
+            value = tempUnit === 'F' ? hour.temperature_f : hour.temperature_c;
+            break;
+        case 'precip':
+            value = hour.precip_chance;
+            break;
+        case 'humidity':
+            value = hour.humidity;
+            break;
+        case 'wind':
+            value = hour.wind_mph;
+            break;
+        default:
+            value = 0;
+    }
+    return {
+        time: hour.time.replace(' ', ''), // Compact time for display
+        value: value,
+    }
+  }), [data, dataType, tempUnit]);
+
   
   const chartConfig = {
-    temperature: {
-      label: `Temp. (°${tempUnit})`,
-      color: 'hsl(var(--primary))',
+    value: {
+      label: config.label(tempUnit),
+      color: config.color,
     },
   };
+  
+  const yAxisWidth = dataType === 'temperature' ? 30 : 25;
 
   return (
-    <div>
-      <h3 className="mb-4 text-lg font-bold">{title}</h3>
       <div className="h-[200px] w-full">
         <ChartContainer config={chartConfig} className="h-full w-full">
-          <LineChart
+          <ComposedChart
             data={chartData}
             margin={{
               top: 5,
-              right: 20,
-              left: 0,
+              right: 10,
+              left: -10,
               bottom: 5,
             }}
           >
@@ -61,34 +105,49 @@ const HourlyChart = ({
               style={{ fontSize: '0.75rem' }}
             />
             <YAxis
-              tickFormatter={(value) => `${value}°`}
+              tickFormatter={(value) => config.formatter(value, tempUnit).replace(/°[FC]/, '°').replace(' mph', '')}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              width={30}
+              width={yAxisWidth}
                style={{ fontSize: '0.75rem' }}
+               domain={dataType === 'precip' || dataType === 'humidity' ? [0, 100] : ['auto', 'auto']}
             />
-            <Tooltip
+            <ChartTooltip
               cursor={{
                 stroke: 'hsl(var(--border))',
-                strokeWidth: 2,
+                strokeWidth: 1,
                 strokeDasharray: '3 3',
               }}
               content={<ChartTooltipContent 
-                formatter={(value) => `${value}°${tempUnit}`}
+                formatter={(value) => config.formatter(Number(value), tempUnit)}
+                nameKey="value"
+                labelKey='time'
               />}
             />
-            <Line
-              dataKey="temperature"
+            <defs>
+                <linearGradient id={`${dataType}Color`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={config.color} stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor={config.color} stopOpacity={0}/>
+                </linearGradient>
+            </defs>
+             <Area
+              dataKey="value"
               type="monotone"
-              stroke="var(--color-temperature)"
+              fill={`url(#${dataType}Color)`}
+              strokeWidth={0}
+              stackId="a"
+            />
+            <Line
+              dataKey="value"
+              type="monotone"
+              stroke={config.color}
               strokeWidth={2}
               dot={false}
             />
-          </LineChart>
+          </ComposedChart>
         </ChartContainer>
       </div>
-    </div>
   );
 };
 

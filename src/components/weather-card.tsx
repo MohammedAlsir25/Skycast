@@ -8,7 +8,10 @@ import HourlyChart from './hourly-chart';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, LineChart, Droplets, Wind } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Thermometer } from 'lucide-react';
+
 
 interface WeatherCardProps {
   location: WeatherLocation;
@@ -96,7 +99,29 @@ const WeatherCard = ({
             </div>
         )}
         <Separator/>
-        <HourlyChart data={hourlyData} tempUnit={tempUnit} />
+        <div>
+            <h3 className="mb-4 text-lg font-bold">Hourly Forecast</h3>
+            <Tabs defaultValue="temperature">
+                <TabsList className='grid w-full grid-cols-4'>
+                    <TabsTrigger value="temperature"><Thermometer className='h-4 w-4 mr-2'/>Temp</TabsTrigger>
+                    <TabsTrigger value="precip"><Droplets className='h-4 w-4 mr-2'/>Precip</TabsTrigger>
+                    <TabsTrigger value="humidity"><Droplets className='h-4 w-4 mr-2'/>Humidity</TabsTrigger>
+                    <TabsTrigger value="wind"><Wind className='h-4 w-4 mr-2'/>Wind</TabsTrigger>
+                </TabsList>
+                <TabsContent value="temperature">
+                    <HourlyChart data={hourlyData} dataType='temperature' tempUnit={tempUnit} />
+                </TabsContent>
+                <TabsContent value="precip">
+                    <HourlyChart data={hourlyData} dataType='precip' tempUnit={tempUnit} />
+                </TabsContent>
+                 <TabsContent value="humidity">
+                    <HourlyChart data={hourlyData} dataType='humidity' tempUnit={tempUnit} />
+                </TabsContent>
+                 <TabsContent value="wind">
+                    <HourlyChart data={hourlyData} dataType='wind' tempUnit={tempUnit} />
+                </TabsContent>
+            </Tabs>
+        </div>
         <Separator/>
         <DailyForecast data={dailyData} onDaySelect={onDaySelect} selectedIndex={selectedDayIndex} tempUnit={tempUnit}/>
       </CardContent>
