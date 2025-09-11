@@ -1,7 +1,7 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['react-leaflet'],
+  transpilePackages: ['react-leaflet', 'leaflet-defaulticon-compatibility'],
   typescript: {
     ignoreBuildErrors: true,
   },
