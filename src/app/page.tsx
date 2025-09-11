@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getWeather } from '@/app/actions';
 import { summarizeWeather } from '@/ai/flows/weather-summary-flow';
 import { findNearbyCities } from '@/ai/flows/nearby-cities-flow';
+import { getClothingRecommendation } from '@/ai/flows/clothing-recommendation-flow';
 import type { WeatherData, DailyForecast, HourlyForecast, WeatherPeriod } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
@@ -50,6 +51,7 @@ export default function Home() {
   const [nearbyCitiesWeather, setNearbyCitiesWeather] = useState<WeatherData[]>([]);
   const [loadingNearby, setLoadingNearby] = useState(false);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [clothingRecommendation, setClothingRecommendation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -83,6 +85,7 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setAiSummary(null);
+    setClothingRecommendation(null);
     setNearbyCitiesWeather([]);
     setSelectedDayIndex(0); // Reset to today on new search
     form.clearErrors();
@@ -97,8 +100,15 @@ export default function Home() {
         setAiSummary(summary);
       } catch (err) {
         console.error("AI summary failed:", err);
-        // Don't show an error to the user, just gracefully degrade.
         setAiSummary(null);
+      }
+
+      try {
+        const recommendation = await getClothingRecommendation(data);
+        setClothingRecommendation(recommendation);
+      } catch (err) {
+        console.error("Clothing recommendation failed:", err);
+        setClothingRecommendation(null);
       }
 
       fetchNearbyCitiesWeather(data.location.country, data.location.name);
@@ -269,6 +279,7 @@ export default function Home() {
                     dailyData={weatherData.daily}
                     hourlyData={getHourlyForSelectedDay(weatherData.hourly, selectedDay)}
                     aiSummary={aiSummary}
+                    clothingRecommendation={clothingRecommendation}
                     onDaySelect={setSelectedDayIndex}
                     selectedDayIndex={selectedDayIndex}
                     tempUnit={tempUnit}

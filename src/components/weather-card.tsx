@@ -8,7 +8,7 @@ import HourlyChart from './hourly-chart';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
-import { Droplets, Wind, Thermometer } from 'lucide-react';
+import { Droplets, Wind, Thermometer, Shirt } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
@@ -18,6 +18,7 @@ interface WeatherCardProps {
   dailyData: DailyForecast[];
   hourlyData: HourlyForecast[];
   aiSummary: string | null;
+  clothingRecommendation: string | null;
   onDaySelect: (index: number) => void;
   selectedDayIndex: number;
   tempUnit: TempUnit;
@@ -31,6 +32,7 @@ const WeatherCard = ({
     dailyData, 
     hourlyData,
     aiSummary,
+    clothingRecommendation,
     onDaySelect, 
     selectedDayIndex,
     tempUnit,
@@ -97,11 +99,20 @@ const WeatherCard = ({
            <Separator orientation='vertical' className="hidden md:flex h-24"/>
            <WeatherDetails period={displayWeather} />
         </div>
+        
         {aiSummary && (
             <div className="rounded-lg border bg-accent/50 p-4 text-sm text-accent-foreground">
                 {aiSummary}
             </div>
         )}
+
+        {clothingRecommendation && (
+            <div className="flex items-center gap-4 rounded-lg border bg-accent/50 p-4 text-sm text-accent-foreground">
+                <Shirt className="h-6 w-6 shrink-0" />
+                <p>{clothingRecommendation}</p>
+            </div>
+        )}
+
         <Separator/>
         <div>
             <h3 className="mb-4 text-lg font-bold">Hourly Forecast</h3>
