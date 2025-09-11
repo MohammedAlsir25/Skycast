@@ -27,7 +27,11 @@ interface MapModalProps {
 // Component to auto-fit the map to the markers
 const MapBounds = ({ bounds }: { bounds: LatLngBoundsExpression }) => {
   const map = useMap();
-  map.fitBounds(bounds, { padding: [50, 50] });
+  useEffect(() => {
+    if (bounds && Array.isArray(bounds) && bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [map, bounds]);
   return null;
 };
 
@@ -38,10 +42,10 @@ const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps)
     setIsMounted(true);
   }, []);
 
-  if (!isMounted || !isOpen || weatherDataList.length === 0) {
+  if (!isMounted) {
     return null;
   }
-
+  
   const positions = weatherDataList.map(data => ({
     lat: data.location.lat,
     lng: data.location.lon,
@@ -62,6 +66,7 @@ const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps)
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow p-6 pt-2">
+           {isOpen && weatherDataList.length > 0 && (
             <MapContainer
                 center={[positions[0].lat, positions[0].lng]}
                 zoom={hasMultiplePoints ? undefined : 10}
@@ -81,6 +86,7 @@ const MapModal = ({ isOpen, onClose, weatherDataList, tempUnit }: MapModalProps)
                 ))}
                 {hasMultiplePoints && <MapBounds bounds={bounds} />}
             </MapContainer>
+           )}
         </div>
       </DialogContent>
     </Dialog>
