@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, LoaderCircle, MapPin, Compass } from 'lucide-react';
+import { Search, LoaderCircle, MapPin } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,7 @@ const getHourlyForSelectedDay = (
 ): HourlyForecast[] => {
   if (!hourly || !selectedDay) return [];
   const selectedDate = new Date(selectedDay.date).toISOString().split('T')[0];
-  return hourly.filter(h => h.date === selectedDate).slice(0, 12);
+  return hourly.filter(h => h.date === selectedDate);
 };
 
 
