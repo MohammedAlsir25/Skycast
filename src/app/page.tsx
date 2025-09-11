@@ -187,7 +187,7 @@ export default function Home() {
         </AnimatePresence>
 
 
-        <div className="relative min-h-[300px]">
+        <div className="relative min-h-[450px]">
             {(loading || !weather) && (
                  <div className="absolute inset-0 flex h-full items-center justify-center">
                     <LoaderCircle className="h-12 w-12 animate-spin text-primary" />
